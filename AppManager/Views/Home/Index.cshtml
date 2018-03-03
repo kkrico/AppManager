@@ -1,0 +1,53 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    @Styles.Render("~/css")
+</head>
+<body ng-app="appManager">
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                    '       <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">App Manager</a>
+            </div>
+            <div id="navbar" class="collapse navbar-collapse">
+                <ul class="nav navbar-nav">
+                    <li><a href="/">Home</a></li>
+                </ul>
+            </div><!--/.nav-collapse -->
+        </div>
+    </nav>
+
+    <div class="container" id="mainBody">
+        <div class="row">
+            <div class="col-md-9" ng-view>
+
+            </div>
+            <div class="col-md-3" ng-controller="demoController">
+                <h1>{{ mensagem }}</h1>
+                <div ng-repeat="n in numero.connected track by $index" id="autoscroll">
+                    <h4> {{ n }}</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+    @{
+        var urlRoot = HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Authority) + Url.Content("~");
+        urlRoot = !string.IsNullOrWhiteSpace(urlRoot) && urlRoot.EndsWith("/") ? urlRoot.Remove(urlRoot.Length - 1) : urlRoot;
+    }
+    var urlRoot = '@urlRoot';
+    </script>
+    @Scripts.Render("~/js")
+    <script src="~/signalr/hubs"></script>
+</body>
+</html>

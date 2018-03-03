@@ -1,0 +1,37 @@
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace AppManager.Data.Entity
+{
+    [Table("APPLICATION")]
+    public partial class Application
+    {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
+        public Application()
+        {
+            IISWebsites = new HashSet<IISWebsite>();
+        }
+
+        [Key]
+        [Column("IDAPPLICATION")]
+        public int Idapplication { get; set; }
+
+        [Column("IDWEBSERVER")]
+        public int? Idwebserver { get; set; }
+
+        [Required]
+        [StringLength(99)]
+        [Column("NAMEAPPLICATION")]
+        public string Nameapplication { get; set; }
+
+        [StringLength(5)]
+        [Column("INITIALSAPPLICATION")]
+        public string Initialsapplication { get; set; }
+
+        public virtual Webserver Webserver { get; set; }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<IISWebsite> IISWebsites{ get; set; }
+    }
+}
