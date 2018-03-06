@@ -1,10 +1,11 @@
-﻿using AppManager.Data.Entity;
+﻿using AppManager.Data.Access.Interfaces;
+using AppManager.Data.Entity;
 
 namespace AppManager.Data.Access
 {
-    public class LogEntryRepository : Repository<Logentry>
+    public class LogentryRepository : Repository<Logentry>, ILogentryRepository
     {
-        public LogEntryRepository(AppManagerDbContext context) : base(context)
+        public LogentryRepository(AppManagerDbContext context) : base(context)
         {
         }
     }

@@ -1,10 +1,11 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AppManager.Data.Entity
 {
     [Table("SOAPENDPOINT")]
-    public partial class Soapendpoint
+    public partial class SoapEndpoint
     {
         [Key]
         [Column("IDSOAPENDPOINT")]
@@ -17,6 +18,12 @@ namespace AppManager.Data.Entity
         [Column("IDSOAPSERVICE")]
         public int? Idsoapservice { get; set; }
 
-        public virtual Soapservice Soapservice { get; set; }
+        [Column("CREATIONDATE")]
+        public DateTime? Creationdate { get; set; }
+
+        [Column("ENDDATE")]
+        public DateTime? Enddate { get; set; }
+
+        public virtual SoapService Soapservice { get; set; }
     }
 }

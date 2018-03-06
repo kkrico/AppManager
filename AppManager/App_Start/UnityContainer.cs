@@ -3,45 +3,75 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Web;
-using AppManager.Core.Servico;
+using AppManager.Controllers.api;
+using AppManager.Core.Interfaces;
+using AppManager.Core.Service;
 using AppManager.Data.Access;
+using AppManager.Data.Access.Interfaces;
 using AppManager.Data.Entity;
+using AppManager.Hubs;
 using AppManager.Infra.IOC;
+using Microsoft.AspNet.SignalR;
 using Microsoft.Practices.Unity;
 using static System.Web.HttpContext;
 
 namespace AppManager
 {
-    public class UnityConfig
+    /// <summary>
+    /// The unity IOC Container
+    /// </summary>
+    public class UnityContainer
     {
         private static readonly Dictionary<Type, HashSet<Type>> InternalTypeMapping = new Dictionary<Type, HashSet<Type>>();
 
         #region Unity Container
         private static readonly Lazy<IUnityContainer> Container = new Lazy<IUnityContainer>(() =>
         {
-            var container = new UnityContainer();
+            var container = new Microsoft.Practices.Unity.UnityContainer();
             RegisterConventions(container);
             RegisterTypes(container);
             return container;
         });
         #endregion
 
-        public static IUnityContainer GetConfiguredContainer()
-        {
-            return Container.Value;
-        }
+        /// <summary>
+        /// Unity container
+        /// </summary>
+        public static IUnityContainer Instance => Container.Value;
 
+
+        /// <summary>
+        /// Register all types on the app
+        /// </summary>
+        /// <param name="container"></param>
         public static void RegisterTypes(IUnityContainer container)
         {
-            var serverMapPath = Current.Server.MapPath("App_Data/applicationHost.config");
             container.RegisterType<AppManagerDbContext, AppManagerDbContext>(
                 new InjectionConstructor("DefaultConnection"));
             container.RegisterType<IUnitOfWork, UnitOfWork>(new PerThreadLifetimeManager());
-            container.RegisterType<IServerManager, IISServerManager>(new InjectionConstructor(serverMapPath));
-            container.RegisterType<ISiteService, SiteService>();
+
+            ResolveServerManager(container);
+            ResolveAppManager(container);
+
+            container.RegisterType<IAppManagerService, AppManagerService>();
+            
         }
 
-        private static void RegisterConventions(UnityContainer container, IEnumerable<Assembly> assemblies = null)
+        private static void ResolveAppManager(IUnityContainer container)
+        {
+            var parseStatusHub = GlobalHost.ConnectionManager.GetHubContext<ParseStatusHub>();
+            container.RegisterType<AppManagerController>(new InjectionConstructor(container.Resolve<IAppManagerService>(), parseStatusHub));
+        }
+
+        private static void ResolveServerManager(IUnityContainer container)
+        {
+            if (string.IsNullOrEmpty(AppManagerConfig.ApplicationHostConfigFileLocation))
+                container.RegisterType<IIISServerManagerService, IISIiisServerManagerService>();
+            else
+                container.RegisterType<IIISServerManagerService, IISIiisServerManagerService>(new InjectionConstructor(AppManagerConfig.ApplicationHostConfigFileLocation));
+        }
+
+        private static void RegisterConventions(Microsoft.Practices.Unity.UnityContainer container, IEnumerable<Assembly> assemblies = null)
         {
             foreach (var type in GetClassesFromAssemblies(assemblies))
             {

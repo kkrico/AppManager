@@ -1,10 +1,9 @@
 ﻿using System.Data.Entity;
 using System.Linq;
-using System.Linq.Expressions;
 
-namespace AppManager.Data.Access
+namespace AppManager.Data.Access.Interfaces
 {
-    internal interface IRepository<T> where T : class
+    public interface IRepository<T> where T : class
     {
         IQueryable<T> GetAll();
         T Get(object id);

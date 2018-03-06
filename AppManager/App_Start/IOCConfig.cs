@@ -16,13 +16,13 @@ namespace AppManager
         {
             GlobalConfiguration.Configuration.Services.Replace(
                 typeof(IHttpControllerActivator),
-                new UnityControllerActivator(UnityConfig.GetConfiguredContainer()));
-            filterProviderCollection.Add(new UnityFilterAttributeFilterProvider(UnityConfig.GetConfiguredContainer()));
+                new UnityControllerActivator(UnityContainer.Instance));
+            filterProviderCollection.Add(new UnityFilterAttributeFilterProvider(UnityContainer.Instance));
         }
 
         private static void RegisterContainer(ControllerBuilder current)
         {
-            var container = UnityConfig.GetConfiguredContainer();
+            var container = UnityContainer.Instance;
 
             var controllerFactory = new UnityControllerFactory(container);
             current.SetControllerFactory(controllerFactory);
@@ -30,7 +30,7 @@ namespace AppManager
 
         public static void DisposeContainers()
         {
-            var container = UnityConfig.GetConfiguredContainer();
+            var container = UnityContainer.Instance;
 
             container.Dispose();
         }

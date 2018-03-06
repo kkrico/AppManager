@@ -3,23 +3,25 @@ using AppManager.Data.Entity;
 
 namespace AppManager.Data.Access
 {
-    public partial class AppManagerDbContext : DbContext
+    public class AppManagerDbContext : DbContext
     {
-        public AppManagerDbContext()
-            : this(default (string))
+        public AppManagerDbContext():this("DefaultConnection")
+        {
+            
+        }
+
+        public AppManagerDbContext(string nameOrConnectionString)
+            : base(nameOrConnectionString)
         {
         }
 
-        public AppManagerDbContext(string nameOrConnectionString) : base(nameOrConnectionString)
-        {
-        }   
-
         public virtual DbSet<Application> Application { get; set; }
-        public virtual DbSet<IISWebsite> IISWebsite { get; set; }
-        public virtual DbSet<IISWebsitesoapservice> IISWebsitesoapservice { get; set; }
+        public virtual DbSet<IISApplication> IISApplication { get; set; }
+        public virtual DbSet<IISApplicationSoapService> IISApplicationSoapService { get; set; }
+        public virtual DbSet<IISWebSite> IISWebSite { get; set; }
         public virtual DbSet<Logentry> Logentry { get; set; }
-        public virtual DbSet<Soapendpoint> Soapendpoint { get; set; }
-        public virtual DbSet<Soapservice> Soapservice { get; set; }
+        public virtual DbSet<SoapEndpoint> SoapEndpoint { get; set; }
+        public virtual DbSet<SoapService> SoapService { get; set; }
         public virtual DbSet<Webserver> Webserver { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
@@ -32,18 +34,50 @@ namespace AppManager.Data.Access
                 .Property(e => e.Initialsapplication)
                 .IsUnicode(false);
 
-            modelBuilder.Entity<IISWebsite>()
-                .Property(e => e.Namewebsite)
-                .IsUnicode(false);
-
-            modelBuilder.Entity<IISWebsite>()
+            modelBuilder.Entity<IISApplication>()
                 .Property(e => e.Applogpath)
                 .IsUnicode(false);
 
-            modelBuilder.Entity<IISWebsite>()
-                .HasMany(e => e.IISWebsitesoapservices)
-                .WithRequired(e => e.IISWebsite)
+            modelBuilder.Entity<IISApplication>()
+                .Property(e => e.Physicalpath)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<IISApplication>()
+                .Property(e => e.Logicalpath)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<IISApplication>()
+                .Property(e => e.Apppollname)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<IISApplication>()
+                .Property(e => e.Iislogpath)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<IISApplication>()
+                .HasMany(e => e.Iisapplicationsoapservice)
+                .WithRequired(e => e.Iisapplication)
                 .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<IISWebSite>()
+                .Property(e => e.Namewebsite)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<IISWebSite>()
+                .Property(e => e.Apppollname)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<IISWebSite>()
+                .Property(e => e.Adresswebsite)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<IISWebSite>()
+                .Property(e => e.Iislogpath)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<IISWebSite>()
+                .Property(e => e.Aliasiiswebsite)
+                .IsUnicode(false);
 
             modelBuilder.Entity<Logentry>()
                 .Property(e => e.Urlpath)
@@ -61,16 +95,16 @@ namespace AppManager.Data.Access
                 .Property(e => e.Hash)
                 .IsUnicode(false);
 
-            modelBuilder.Entity<Soapendpoint>()
+            modelBuilder.Entity<SoapEndpoint>()
                 .Property(e => e.Url)
                 .IsUnicode(false);
 
-            modelBuilder.Entity<Soapservice>()
+            modelBuilder.Entity<SoapService>()
                 .Property(e => e.Namesoapservice)
                 .IsUnicode(false);
 
-            modelBuilder.Entity<Soapservice>()
-                .HasMany(e => e.Iiswebsitesoapservice)
+            modelBuilder.Entity<SoapService>()
+                .HasMany(e => e.Iisapplicationsoapservice)
                 .WithRequired(e => e.Soapservice)
                 .WillCascadeOnDelete(false);
 

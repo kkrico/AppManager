@@ -5,7 +5,7 @@ namespace AppManager
 {
     public class PerformanceEngineConfig
     {
-        public static void RegistrarMonitoramento()
+        public static void RegisterPerformanceMonitor()
         {
             Task.Factory.StartNew(() => PerformanceEngine.Instance.IniciarMonitoramento());
         }

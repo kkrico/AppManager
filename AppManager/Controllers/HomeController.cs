@@ -1,19 +1,22 @@
 ﻿using System.Linq;
 using System.Reflection;
 using System.Web.Mvc;
-using AppManager.Core.Servico;
+using AppManager.Core.Interfaces;
 
 namespace AppManager.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ISiteService _siteService;
+        private readonly IIISWebSiteService _iiisWebSiteService;
+        private readonly IIISServerManagerService _iiisServerManagerService;
 
-        public HomeController(ISiteService siteService)
+        public HomeController(IIISWebSiteService iiisWebSiteService, IIISServerManagerService iiisServerManagerService)
         {
-            _siteService = siteService;
+            _iiisWebSiteService = iiisWebSiteService;
+            _iiisServerManagerService = iiisServerManagerService;
         }
-        // GET
+        
+        [HttpGet]
         public ActionResult Index()
         {
             return View();

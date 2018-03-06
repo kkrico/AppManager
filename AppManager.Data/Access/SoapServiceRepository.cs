@@ -1,10 +1,11 @@
-﻿using AppManager.Data.Entity;
+﻿using AppManager.Data.Access.Interfaces;
+using AppManager.Data.Entity;
 
 namespace AppManager.Data.Access
 {
-    public class SoapServiceRepository : Repository<Soapservice>
+    public class SoapServiceRepository : Repository<SoapService>, ISoapServiceRepository
     {
-        public SoapServiceRepository(AppManagerDbContext context) : base(context)
+        public SoapServiceRepository(AppManagerDbContext dbContext) : base(dbContext)
         {
         }
     }

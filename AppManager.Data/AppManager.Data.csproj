@@ -49,30 +49,41 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Access\ApplicationRepository.cs" />
+    <Compile Include="Access\IISApplicationRepository.cs" />
+    <Compile Include="Access\IISApplicationSoapServiceRepository.cs" />
     <Compile Include="Access\IISWebSiteRepository.cs" />
-    <Compile Include="Access\IISWebsitesoapservice.cs" />
-    <Compile Include="Access\IRepository.cs" />
-    <Compile Include="Access\LogEntryRepository.cs" />
-    <Compile Include="Access\Repository.cs" />
-    <Compile Include="Access\SoapendpointRepository.cs" />
+    <Compile Include="Access\Interfaces\IApplicationRepository.cs" />
+    <Compile Include="Access\Interfaces\IIISApplicationRepository.cs" />
+    <Compile Include="Access\Interfaces\IIISApplicationSoapServiceRepository.cs" />
+    <Compile Include="Access\Interfaces\IIISWebSiteRepository.cs" />
+    <Compile Include="Access\Interfaces\ILogentryRepository.cs" />
+    <Compile Include="Access\Interfaces\IRepository.cs" />
+    <Compile Include="Access\Interfaces\ISoapEndpointRepository.cs" />
+    <Compile Include="Access\Interfaces\ISoapServiceRepository.cs" />
+    <Compile Include="Access\Interfaces\IWebserverRepository.cs" />
+    <Compile Include="Access\LogentryRepository.cs" />
+    <Compile Include="Access\SoapEndpointRepository.cs" />
     <Compile Include="Access\SoapServiceRepository.cs" />
     <Compile Include="Access\UnitOfWork.cs" />
+    <Compile Include="Access\Repository.cs" />
     <Compile Include="Access\WebserverRepository.cs" />
     <Compile Include="Entity\Application.cs" />
-    <Compile Include="Entity\IISWebsite.cs" />
-    <Compile Include="Entity\IISWebsitesoapservice.cs" />
+    <Compile Include="Entity\FoundIISWebSite.cs" />
+    <Compile Include="Entity\IISApplication.cs" />
+    <Compile Include="Entity\IISApplicationSoapService.cs" />
+    <Compile Include="Entity\IISWebSite.cs" />
     <Compile Include="Entity\Logentry.cs" />
     <Compile Include="Access\AppManagerDbContext.cs" />
+    <Compile Include="Entity\RunMode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Access\IUnitOfWork.cs" />
-    <Compile Include="Entity\Soapendpoint.cs" />
-    <Compile Include="Entity\Soapservice.cs" />
+    <Compile Include="Access\Interfaces\IUnitOfWork.cs" />
+    <Compile Include="Entity\SoapEndpoint.cs" />
+    <Compile Include="Entity\SoapService.cs" />
     <Compile Include="Entity\Webserver.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

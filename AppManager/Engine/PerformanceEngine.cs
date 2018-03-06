@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
-using AppManager.Core.Servico;
+using AppManager.Core.Interfaces;
 using AppManager.Hubs;
 using Microsoft.AspNet.SignalR;
 using Microsoft.Practices.Unity;
@@ -19,32 +19,33 @@ namespace AppManager.Engine
     public class PerformanceEngine
     {
         private readonly IHubContext _hub;
-        private static readonly Lazy<PerformanceEngine> Lazy =
+        private static readonly Lazy<PerformanceEngine> InstanceHolder =
             new Lazy<PerformanceEngine>(() => new PerformanceEngine());
 
-        private ISiteService _siteService;
+        private IIISWebSiteService _iiisWebSiteService;
 
         private PerformanceEngine()
         {
-            _siteService = UnityConfig.GetConfiguredContainer().Resolve<ISiteService>();
-
+            _iiisWebSiteService = UnityContainer.Instance.Resolve<IIISWebSiteService>();
             _hub = GlobalHost.ConnectionManager.GetHubContext<LogHub>();
-            var fileSystemWatcher = new FileSystemWatcher()
-            {
-                Filter = "*.xml",
-                Path = "C:\\AppLogs\\",
-                IncludeSubdirectories = true,
-                NotifyFilter = NotifyFilters.LastAccess | 
-                               NotifyFilters.LastWrite | 
-                               NotifyFilters.FileName | 
-                               NotifyFilters.DirectoryName
-            };
-            fileSystemWatcher.EnableRaisingEvents = true;
 
-            fileSystemWatcher.Changed += OnChanged;
-            fileSystemWatcher.Created += Created;
-            fileSystemWatcher.Deleted += Deleted;
-            fileSystemWatcher.Renamed += OnRenamed;
+
+            //var fileSystemWatcher = new FileSystemWatcher
+            //{
+            //    Filter = "*.xml",
+            //    Path = "C:\\AppLogs\\",
+            //    IncludeSubdirectories = true,
+            //    NotifyFilter = NotifyFilters.LastAccess |
+            //                   NotifyFilters.LastWrite |
+            //                   NotifyFilters.FileName |
+            //                   NotifyFilters.DirectoryName,
+            //    EnableRaisingEvents = true
+            //};
+
+            //fileSystemWatcher.Changed += OnChanged;
+            //fileSystemWatcher.Created += Created;
+            //fileSystemWatcher.Deleted += Deleted;
+            //fileSystemWatcher.Renamed += OnRenamed;
         }
 
         private void OnChanged(object sender, FileSystemEventArgs e)
@@ -68,10 +69,7 @@ namespace AppManager.Engine
         }
 
 
-        public static PerformanceEngine Instance
-        {
-            get { return Lazy.Value; }
-        }
+        public static PerformanceEngine Instance => InstanceHolder.Value;
 
         public Task IniciarMonitoramento()
         {

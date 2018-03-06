@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -7,35 +8,40 @@ namespace AppManager.Data.Entity
     public partial class Logentry
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         [Column("IDLOGENTRY")]
         public int Idlogentry { get; set; }
-
-        [Column("IDIISWEBSITE")]
-        public int? Idiiswebsite { get; set; }
 
         [Column("LOGTYPE")]
         public short? Logtype { get; set; }
 
-        [Column("URLPATH")]
+        [Column("IDIISAPPLICATION")]
+        public int? Idiisapplication { get; set; }
+
         [StringLength(256)]
+        [Column("URLPATH")]
         public string Urlpath { get; set; }
 
-        [Column("METHOD")]
         [StringLength(2000)]
+        [Column("METHOD")]
         public string Method { get; set; }
 
-        [Column("MESSAGE")]
         [StringLength(2000)]
+        [Column("MESSAGE")]
         public string Message { get; set; }
 
-        [Column("HASH")]
         [StringLength(255)]
+        [Column("HASH")]
         public string Hash { get; set; }
 
         [Column("APPLOGID")]
         public int Applogid { get; set; }
 
-        public virtual IISWebsite IISWebsite { get; set; }
+        [Column("CREATIONDATE")]
+        public DateTime? Creationdate { get; set; }
+
+        [Column("ENDDATE")]
+        public DateTime? Enddate { get; set; }
+
+        public virtual IISApplication Iisapplication { get; set; }
     }
 }

@@ -28,6 +28,7 @@ namespace AppManager
                 .Include($"~/Scripts/{appName}/*.js")
                 .Include($"~/Scripts/{appName}/controllers/*.js")
                 .Include($"~/Scripts/{appName}/services/*.js")
+                .Include($"~/Scripts/{appName}/directives/*.js")
                 .Include($"~/Scripts/*.js")
             );
         }

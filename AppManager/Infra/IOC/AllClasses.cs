@@ -22,7 +22,7 @@ namespace AppManager.Infra.IOC
 
         private static string GetUnityProductName()
         {
-            var assembly = typeof(UnityContainer).Assembly;
+            var assembly = typeof(Microsoft.Practices.Unity.UnityContainer).Assembly;
 
             var productAttribute = assembly.GetCustomAttributes(typeof(AssemblyProductAttribute), true);
 

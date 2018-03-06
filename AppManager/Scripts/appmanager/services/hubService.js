@@ -1,8 +1,8 @@
-﻿(function () {
+﻿(function (jquery) {
 
     angular
         .module("appManager.services")
-        .constant("$", window.jQuery)
+        .constant("$", jquery)
         .factory("Hub", ["$", function ($) {
 
 
@@ -66,4 +66,4 @@
             };
 
         }]);
-})();
+})(window.jQuery);
