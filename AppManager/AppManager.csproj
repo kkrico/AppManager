@@ -31,6 +31,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\AppManager.xml</DocumentationFile>
+    <FilesToIncludeForPublish>AllFilesInTheProject</FilesToIncludeForPublish>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -179,6 +180,7 @@
     <Content Include="Scripts\appmanager\app.js" />
     <Content Include="Scripts\appmanager\controllers\logController.js" />
     <Content Include="Scripts\appmanager\controllers\homeController.js" />
+    <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <None Include="Scripts\jquery\jquery-1.6.4-vsdoc.js" />
     <Content Include="Scripts\appmanager\controllers\parseStatusController.js" />
     <Content Include="Scripts\appmanager\directives\gearDirective.js" />

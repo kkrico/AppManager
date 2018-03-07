@@ -1,18 +1,17 @@
 using System.Data.Entity;
+using System.Diagnostics;
 using AppManager.Data.Entity;
 
 namespace AppManager.Data.Access
 {
     public class AppManagerDbContext : DbContext
     {
-        public AppManagerDbContext():this("DefaultConnection")
-        {
-            
-        }
-
         public AppManagerDbContext(string nameOrConnectionString)
             : base(nameOrConnectionString)
         {
+            Configuration.LazyLoadingEnabled = false;
+            Configuration.ProxyCreationEnabled = false;
+            this.Database.Log += s => Debug.WriteLine(s);
         }
 
         public virtual DbSet<Application> Application { get; set; }

@@ -47,5 +47,8 @@ namespace AppManager.Data.Entity
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<IISApplication> Iisapplication { get; set; }
+
+        [Column("IISWEBSITEID")]
+        public int IISWebSiteId { get; set; }
     }
 }

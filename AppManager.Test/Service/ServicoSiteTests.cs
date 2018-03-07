@@ -1,5 +1,4 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using AppManager.Core.Servico;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -12,7 +11,7 @@ using AppManager.Data.Access.Interfaces;
 using AppManager.Data.Entity;
 using Moq;
 
-namespace AppManager.Core.Servico.Tests
+namespace AppManager.Core.Service.Tests
 {
     [TestClass]
     public class ServicoSiteTests

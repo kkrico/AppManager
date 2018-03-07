@@ -50,6 +50,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Messages\Message.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Message.resx</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Service\AppManagerService.cs" />
     <Compile Include="Service\IISServerManager.cs" />
@@ -57,7 +62,12 @@
     <Compile Include="Interfaces\IIISWebSiteService.cs" />
     <Compile Include="Service\IISWebSiteService.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Messages\Message.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Message.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AppManager.Data\AppManager.Data.csproj">
       <Project>{ae88010d-94cc-4945-8098-eb553ee73004}</Project>

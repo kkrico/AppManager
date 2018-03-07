@@ -66,9 +66,9 @@ namespace AppManager
         private static void ResolveServerManager(IUnityContainer container)
         {
             if (string.IsNullOrEmpty(AppManagerConfig.ApplicationHostConfigFileLocation))
-                container.RegisterType<IIISServerManagerService, IISIiisServerManagerService>();
+                container.RegisterType<IIISServerManagerService, IISServerManagerService>();
             else
-                container.RegisterType<IIISServerManagerService, IISIiisServerManagerService>(new InjectionConstructor(AppManagerConfig.ApplicationHostConfigFileLocation));
+                container.RegisterType<IIISServerManagerService, IISServerManagerService>(new InjectionConstructor(AppManagerConfig.ApplicationHostConfigFileLocation));
         }
 
         private static void RegisterConventions(Microsoft.Practices.Unity.UnityContainer container, IEnumerable<Assembly> assemblies = null)
