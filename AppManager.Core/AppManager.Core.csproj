@@ -57,6 +57,7 @@
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Service\AppManagerService.cs" />
+    <Compile Include="Interfaces\IAppManagerService.cs" />
     <Compile Include="Service\IISServerManager.cs" />
     <Compile Include="Interfaces\IIISServerManager.cs" />
     <Compile Include="Interfaces\IIISWebSiteService.cs" />

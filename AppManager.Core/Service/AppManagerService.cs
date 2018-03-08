@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Data.Entity.Migrations;
 using System.Linq;
 using System.Text;
 using AppManager.Core.Interfaces;
 using AppManager.Data.Access.Interfaces;
 using AppManager.Data.Entity;
+using static System.String;
 
 namespace AppManager.Core.Service
 {
@@ -13,6 +15,7 @@ namespace AppManager.Core.Service
     {
         private readonly IUnitOfWork _uow;
         private readonly IIISServerManagerService _iiisServerManagerService;
+        private bool hasFieldToUpdate;
 
         public AppManagerService(IUnitOfWork uow, IIISServerManagerService iiisServerManagerService)
         {
@@ -23,37 +26,78 @@ namespace AppManager.Core.Service
         public void Parse()
         {
             var foundWebSites = _iiisServerManagerService.ListWebSites();
-            if (foundWebSites == null)
-                throw new InvalidOperationException();
+            if (foundWebSites == null || !foundWebSites.Any())
+                return;
 
             var ctx = _uow.DbContext;
+            var foundIds = foundWebSites.Select(e => (int)e.IISId);
 
-            var newWebSites = from fws in foundWebSites
-                              join s in ctx.IISWebSite on fws.IISId equals s.IISWebSiteId into siteGroup
-                              from d in siteGroup.DefaultIfEmpty()
-                              select fws;
+            var existingOnes = ctx.IISWebSite.Where(e => foundIds.Contains(e.IISWebSiteId) && e.Enddate == null);
+            var idsExistingOnes = existingOnes.Select(e => e.IISWebSiteId);
+            var newOnes = foundIds.Except(existingOnes.Select(e => e.IISWebSiteId));
+            var toDelete = ctx.IISWebSite.Where(s => !idsExistingOnes.Contains(s.IISWebSiteId) && s.Enddate != null);
 
-            var foundIisWebSitesToRecord = newWebSites.ToList();
 
-            var newRecords = foundIisWebSitesToRecord.Select(e => new IISWebSite()
+            foreach (var iisWebSite in toDelete)
             {
-                Namewebsite = e.Namewebsite,
-                Apppollname = e.Apppollname,
-                Creationdate = DateTime.Now,
-                IISWebSiteId = (int) e.IISId,
-                Iislogpath = e.IISLogPath
-            });
-
-            foreach (var iisWebSite in newRecords)
-            {
-                ctx.IISWebSite.Add(iisWebSite);
+                iisWebSite.Enddate = DateTime.Now;
             }
-            ctx.SaveChanges();
-        }
-    }
 
-    public interface IAppManagerService
-    {
-        void Parse();
+            var newIisWebSites = new List<IISWebSite>();
+            foreach (var idfoundIisWebSite in newOnes)
+            {
+                var foundIisWebsite = foundWebSites.First(s => s.IISId == idfoundIisWebSite);
+
+                newIisWebSites.Add(new IISWebSite
+                {
+                    Namewebsite = foundIisWebsite.Namewebsite,
+                    Apppollname = foundIisWebsite.Apppollname,
+                    Creationdate = DateTime.Now,
+                    IISWebSiteId = (int)foundIisWebsite.IISId,
+                    Iislogpath = foundIisWebsite.IISLogPath
+                });
+            }
+
+            ctx.IISWebSite.AddRange(newIisWebSites);
+
+            foreach (var iisWebSite in existingOnes)
+            {
+                var foundIisWebsite = foundWebSites.First(s => s.IISId == iisWebSite.IISWebSiteId);
+                hasFieldToUpdate = foundIisWebsite.Namewebsite != iisWebSite.Namewebsite ||
+                          foundIisWebsite.Apppollname != iisWebSite.Apppollname;
+                if (!hasFieldToUpdate) continue;
+
+                iisWebSite.Apppollname = foundIisWebsite.Apppollname;
+                iisWebSite.Namewebsite = foundIisWebsite.Namewebsite;
+            }
+
+            ctx.SaveChanges();
+            //var newWebSites = foundWebSites.Where(s => !ctx.IISWebSite.Any(ws => ws.IISWebSiteId == s.IISId));
+
+            //var foundIisWebSitesToRecord = newWebSites.ToList();
+            //var newRecords = foundIisWebSitesToRecord.Select(e => new IISWebSite
+            //{
+            //    Namewebsite = e.Namewebsite,
+            //    Apppollname = e.Apppollname,
+            //    Creationdate = DateTime.Now,
+            //    IISWebSiteId = (int)e.IISId,
+            //    Iislogpath = e.IISLogPath
+            //});
+
+
+            //var recordsToUpdate = ctx.IISWebSite.Where(s =>
+            //    foundWebSites.Any(fws => fws.IISId == s.IISWebSiteId && !string.Equals(s.Namewebsite, fws.Namewebsite,
+            //                                 StringComparison.InvariantCultureIgnoreCase)) && s.Enddate != null)
+            //                .ToList()
+            //    .ForEach(s =>
+            //    {
+            //        s.Namewebsite = 
+            //    });
+
+            //foreach (var iisWebSite in newRecords)
+            //    ctx.IISWebSite.Add(iisWebSite);
+
+            //ctx.SaveChanges();
+        }
     }
 }

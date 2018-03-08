@@ -15,7 +15,7 @@ using Moq;
 
 namespace AppManager.Core.Service.Tests
 {
-    [TestClass()]
+    [TestClass]
     public class AppManagerServiceTests
     {
         private Mock<AppManagerService> _appManagerService;
@@ -33,8 +33,8 @@ namespace AppManager.Core.Service.Tests
             _appManagerService = new Mock<AppManagerService>(_uow.Object, _iisServerManagerService.Object);
         }
 
-        [TestMethod()]
-        public void ParseTest()
+        [TestMethod]
+        public void Parse_NaoDeve_InserirWebsite_JaCadastrado()
         {
             var dados = new List<IISWebSite>
             {
@@ -43,32 +43,53 @@ namespace AppManager.Core.Service.Tests
 
             var fakedbSet = new FakeDbSet<IISWebSite>(dados);
             _ctx.Setup(s => s.IISWebSite).Returns(fakedbSet);
-            
+
             var foundIisWebsites = new List<FoundIISWebSite>
             {
                 new FoundIISWebSite {IISId = 1, Apppollname = "AppPoolName1", IISLogPath = "Path"},
-                new FoundIISWebSite {IISId = 2, Apppollname = "AppPoolName1", IISLogPath = "Path"},
-                new FoundIISWebSite {IISId = 3, Apppollname = "AppPoolName1", IISLogPath = "Path"}
             };
             _iisServerManagerService.Setup(s => s.ListWebSites()).Returns(foundIisWebsites);
             _appManagerService.Object.Parse();
-            Assert.AreEqual(true, _uow.Object.DbContext.IISWebSite.Any());
+
+            _ctx.Verify(s => s.SaveChanges(), Times.Never());
         }
 
-
-        private static Mock<DbSet<T>> GetQueryableMockDbSet<T>(List<T> sourceList) where T : class
+        [TestMethod]
+        public void Parse_NaoSalva_SeNaoAchar_Site()
         {
-            var queryable = sourceList.AsQueryable();
+            _iisServerManagerService.Setup(s => s.ListWebSites()).Returns(new List<FoundIISWebSite>());
+            var dados = new List<IISWebSite>
+            {
+                new IISWebSite {IISWebSiteId = 1}
+            };
 
-            var dbSet = new Mock<DbSet<T>>();
-            dbSet.As<IQueryable<T>>().Setup(m => m.Provider).Returns(queryable.Provider);
-            dbSet.As<IQueryable<T>>().Setup(m => m.Expression).Returns(queryable.Expression);
-            dbSet.As<IQueryable<T>>().Setup(m => m.ElementType).Returns(queryable.ElementType);
-            dbSet.As<IQueryable<T>>().Setup(m => m.GetEnumerator()).Returns(() => queryable.GetEnumerator());
-            dbSet.Setup(d => d.Add(It.IsAny<T>())).Callback<T>((s) => sourceList.Add(s));
+            var fakedbSet = new FakeDbSet<IISWebSite>(dados);
+            _ctx.Setup(s => s.IISWebSite).Returns(fakedbSet);
 
-            return dbSet;
+            _appManagerService.Object.Parse();
+            _ctx.Verify(s => s.SaveChanges(), Times.Never());
+        }
 
+        [TestMethod]
+        public void Parse_NaoSalva_SeNaoAchar_Site_RetornoNulo()
+        {
+            _iisServerManagerService.Setup(s => s.ListWebSites()).Returns((List<FoundIISWebSite>)null);
+            var dados = new List<IISWebSite>
+            {
+                new IISWebSite {IISWebSiteId = 1}
+            };
+
+            var fakedbSet = new FakeDbSet<IISWebSite>(dados);
+            _ctx.Setup(s => s.IISWebSite).Returns(fakedbSet);
+
+            _appManagerService.Object.Parse();
+            _ctx.Verify(s => s.SaveChanges(), Times.Never());
+        }
+
+        [TestMethod()]
+        public void ParseTest()
+        {
+            Assert.Fail();
         }
     }
 }
