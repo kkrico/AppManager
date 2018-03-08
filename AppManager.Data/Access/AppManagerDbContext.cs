@@ -12,6 +12,7 @@ namespace AppManager.Data.Access
             Configuration.LazyLoadingEnabled = false;
             Configuration.ProxyCreationEnabled = false;
             this.Database.Log += s => Debug.WriteLine(s);
+            Database.SetInitializer<AppManagerDbContext>(null);
         }
 
         public virtual DbSet<Application> Application { get; set; }
