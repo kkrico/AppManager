@@ -33,26 +33,26 @@ namespace AppManager.Core.Service.Tests
             _appManagerService = new Mock<AppManagerService>(_uow.Object, _iisServerManagerService.Object);
         }
 
-        [TestMethod]
-        public void Parse_NaoDeve_InserirWebsite_JaCadastrado()
-        {
-            var dados = new List<IISWebSite>
-            {
-                new IISWebSite {IISWebSiteId = 1}
-            };
+        //[TestMethod]
+        //public void Parse_NaoDeve_InserirWebsite_JaCadastrado()
+        //{
+        //    var dados = new List<IISWebSite>
+        //    {
+        //        new IISWebSite {IISWebSiteId = 1}
+        //    };
 
-            var fakedbSet = new FakeDbSet<IISWebSite>(dados);
-            _ctx.Setup(s => s.IISWebSite).Returns(fakedbSet);
+        //    var fakedbSet = new FakeDbSet<IISWebSite>(dados);
+        //    _ctx.Setup(s => s.IISWebSite).Returns(fakedbSet);
 
-            var foundIisWebsites = new List<FoundIISWebSite>
-            {
-                new FoundIISWebSite {IISId = 1, Apppollname = "AppPoolName1", IISLogPath = "Path"},
-            };
-            _iisServerManagerService.Setup(s => s.ListWebSites()).Returns(foundIisWebsites);
-            _appManagerService.Object.Parse();
+        //    var foundIisWebsites = new List<FoundIISWebSite>
+        //    {
+        //        new FoundIISWebSite {IISId = 1, Apppollname = "AppPoolName1", IISLogPath = "Path"},
+        //    };
+        //    _iisServerManagerService.Setup(s => s.ListWebSites()).Returns(foundIisWebsites);
+        //    _appManagerService.Object.Parse();
 
-            _ctx.Verify(s => s.SaveChanges(), Times.Never());
-        }
+        //    _ctx.Verify(s => s.SaveChanges(), Times.Never());
+        //}
 
         [TestMethod]
         public void Parse_NaoSalva_SeNaoAchar_Site()
@@ -86,10 +86,10 @@ namespace AppManager.Core.Service.Tests
             _ctx.Verify(s => s.SaveChanges(), Times.Never());
         }
 
-        [TestMethod()]
-        public void ParseTest()
-        {
-            Assert.Fail();
-        }
+        //[TestMethod()]
+        //public void ParseTest()
+        //{
+        //    Assert.Fail();
+        //}
     }
 }
