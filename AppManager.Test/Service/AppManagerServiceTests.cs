@@ -208,20 +208,16 @@ namespace AppManager.Core.Service.Tests
                 new FoundIISWebSite {IISId = 2, Apppollname = "AppPool2"},
                 new FoundIISWebSite {IISId = 1, Apppollname = "AppPoolName1", IISLogPath = "Path"},
             };
+
             _iisServerManagerService.Setup(s => s.ListWebSites()).Returns(foundIisWebsites);
-            var parsedEntity = new List<string>();
-            _appManagerService.Object.OnEntityParse += (source, args) =>
-            {
-                var e = (AppManagerService.EntityParseEventArgs) args;
-                parsedEntity.Add(e.EntityName);
-            };
+            var isCalled = false;
+            _appManagerService.Object.OnEntityParsed += (name, type) => isCalled = name == nameof(IISWebSite);
             _appManagerService.Object.Parse();
 
-            Assert.IsTrue(parsedEntity.Any(s => s.Contains(nameof(IISApplication))));
+            Assert.IsTrue(isCalled);
         }
 
-        
-
+       
         //[TestMethod()]
         //public void ParseTest()
         //{

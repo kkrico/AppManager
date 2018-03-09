@@ -1,22 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Entity;
-using System.Data.Entity.Migrations;
 using System.Linq;
-using System.Text;
 using AppManager.Core.Interfaces;
 using AppManager.Data.Access;
 using AppManager.Data.Access.Interfaces;
 using AppManager.Data.Entity;
-using static System.String;
 
 namespace AppManager.Core.Service
 {
-    public class AppManagerService : IAppManagerService
+    public delegate void NotifyEntityHandler(string entityName, Type typeOfEntity);
+    public interface INotifyEntityParsed
     {
-        private readonly IUnitOfWork _uow;
+        event NotifyEntityHandler OnEntityParsed;
+    }
+
+    public class AppManagerService : IAppManagerService, INotifyEntityParsed
+    {
         private readonly IIISServerManagerService _iiisServerManagerService;
-        public event EventHandler OnEntityParse;
+        private readonly IUnitOfWork _uow;
+
         public AppManagerService(IUnitOfWork uow, IIISServerManagerService iiisServerManagerService)
         {
             _uow = uow;
@@ -37,14 +39,13 @@ namespace AppManager.Core.Service
 
         private void ParseWebSites(ICollection<FoundIISWebSite> foundWebSites, AppManagerDbContext ctx)
         {
-            OnOnEntityParse<IISWebSite>(nameof(IISWebSite));
-
+            RaiseOnEntityParsed<IISWebSite>(nameof(IISWebSite));
             var idsOfFoundIISWebSites = foundWebSites.Select(e => (int) e.IISId);
-
             var webSitesThatAlreadyExist =
                 ctx.IISWebSite.Where(e => idsOfFoundIISWebSites.Contains(e.IISWebSiteId) && e.Enddate == null);
             var newOnes = idsOfFoundIISWebSites.Except(webSitesThatAlreadyExist.Select(e => e.IISWebSiteId));
-            var toDelete = ctx.IISWebSite.Where(s => !idsOfFoundIISWebSites.Contains(s.IISWebSiteId) && s.Enddate == null);
+            var toDelete =
+                ctx.IISWebSite.Where(s => !idsOfFoundIISWebSites.Contains(s.IISWebSiteId) && s.Enddate == null);
 
             DeleteIISWebSite(toDelete);
 
@@ -76,12 +77,11 @@ namespace AppManager.Core.Service
             }
         }
 
+        private void RaiseOnEntityParsed<T>(string entityName) => OnEntityParsed?.Invoke(entityName, typeof(T));
+
         private static void DeleteIISWebSite(IQueryable<IISWebSite> toDelete)
         {
-            foreach (var iisWebSite in toDelete)
-            {
-                iisWebSite.Enddate = DateTime.Now;
-            }
+            foreach (var iisWebSite in toDelete) iisWebSite.Enddate = DateTime.Now;
         }
 
         private static bool HasFieldToUpdate(FoundIISWebSite foundIisWebsite, IISWebSite iisWebSite)
@@ -89,25 +89,12 @@ namespace AppManager.Core.Service
             if (foundIisWebsite == null) throw new ArgumentNullException(nameof(foundIisWebsite));
             if (iisWebSite == null) throw new ArgumentNullException(nameof(iisWebSite));
 
-            return !string.Equals(foundIisWebsite.Namewebsite?.Trim(), iisWebSite.Namewebsite?.Trim(), StringComparison.InvariantCultureIgnoreCase) ||
-                   !string.Equals(foundIisWebsite.Apppollname?.Trim(), iisWebSite.Apppollname?.Trim(), StringComparison.InvariantCultureIgnoreCase);
+            return !string.Equals(foundIisWebsite.Namewebsite?.Trim(), iisWebSite.Namewebsite?.Trim(),
+                       StringComparison.InvariantCultureIgnoreCase) ||
+                   !string.Equals(foundIisWebsite.Apppollname?.Trim(), iisWebSite.Apppollname?.Trim(),
+                       StringComparison.InvariantCultureIgnoreCase);
         }
 
-        protected virtual void OnOnEntityParse<T>(string entityName)
-        {
-            OnEntityParse?.Invoke(this, EventArgs.Empty);
-        }
-
-        public class EntityParseEventArgs: EventArgs
-        {
-            public string EntityName { get; }
-            public Type EntityType { get; }
-
-            public EntityParseEventArgs(string entityName, Type entityType)
-            {
-                EntityName = entityName;
-                EntityType = entityType;
-            }
-        }
+        public event NotifyEntityHandler OnEntityParsed;
     }
 }
