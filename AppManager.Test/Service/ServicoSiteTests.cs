@@ -34,7 +34,7 @@ namespace AppManager.Core.Service.Tests
         [TestMethod]
         public void Listar_Sites_Retorna_Lista_Sites()
         {
-            var sitesEncontrados = new List<IISWebSite>()
+            var sitesEncontrados = new List<IISWebSite>
             {
                 new IISWebSite {Namewebsite= "A"},
                 new IISWebSite {Namewebsite= "B"}

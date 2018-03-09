@@ -5,6 +5,7 @@ using System.Data.Entity.Migrations;
 using System.Linq;
 using System.Text;
 using AppManager.Core.Interfaces;
+using AppManager.Data.Access;
 using AppManager.Data.Access.Interfaces;
 using AppManager.Data.Entity;
 using static System.String;
@@ -15,8 +16,7 @@ namespace AppManager.Core.Service
     {
         private readonly IUnitOfWork _uow;
         private readonly IIISServerManagerService _iiisServerManagerService;
-        private bool hasFieldToUpdate;
-
+        public event EventHandler OnEntityParse;
         public AppManagerService(IUnitOfWork uow, IIISServerManagerService iiisServerManagerService)
         {
             _uow = uow;
@@ -30,18 +30,23 @@ namespace AppManager.Core.Service
                 return;
 
             var ctx = _uow.DbContext;
-            var foundIds = foundWebSites.Select(e => (int)e.IISId);
+            ParseWebSites(foundWebSites, ctx);
 
-            var existingOnes = ctx.IISWebSite.Where(e => foundIds.Contains(e.IISWebSiteId) && e.Enddate == null);
-            var idsExistingOnes = existingOnes.Select(e => e.IISWebSiteId);
-            var newOnes = foundIds.Except(existingOnes.Select(e => e.IISWebSiteId));
-            var toDelete = ctx.IISWebSite.Where(s => !idsExistingOnes.Contains(s.IISWebSiteId) && s.Enddate != null);
+            ctx.SaveChanges();
+        }
 
+        private void ParseWebSites(ICollection<FoundIISWebSite> foundWebSites, AppManagerDbContext ctx)
+        {
+            OnOnEntityParse<IISWebSite>(nameof(IISWebSite));
 
-            foreach (var iisWebSite in toDelete)
-            {
-                iisWebSite.Enddate = DateTime.Now;
-            }
+            var idsOfFoundIISWebSites = foundWebSites.Select(e => (int) e.IISId);
+
+            var webSitesThatAlreadyExist =
+                ctx.IISWebSite.Where(e => idsOfFoundIISWebSites.Contains(e.IISWebSiteId) && e.Enddate == null);
+            var newOnes = idsOfFoundIISWebSites.Except(webSitesThatAlreadyExist.Select(e => e.IISWebSiteId));
+            var toDelete = ctx.IISWebSite.Where(s => !idsOfFoundIISWebSites.Contains(s.IISWebSiteId) && s.Enddate == null);
+
+            DeleteIISWebSite(toDelete);
 
             var newIisWebSites = new List<IISWebSite>();
             foreach (var idfoundIisWebSite in newOnes)
@@ -53,51 +58,56 @@ namespace AppManager.Core.Service
                     Namewebsite = foundIisWebsite.Namewebsite,
                     Apppollname = foundIisWebsite.Apppollname,
                     Creationdate = DateTime.Now,
-                    IISWebSiteId = (int)foundIisWebsite.IISId,
+                    IISWebSiteId = (int) foundIisWebsite.IISId,
                     Iislogpath = foundIisWebsite.IISLogPath
                 });
             }
 
             ctx.IISWebSite.AddRange(newIisWebSites);
 
-            foreach (var iisWebSite in existingOnes)
+            foreach (var iisWebSite in webSitesThatAlreadyExist)
             {
                 var foundIisWebsite = foundWebSites.First(s => s.IISId == iisWebSite.IISWebSiteId);
-                hasFieldToUpdate = foundIisWebsite.Namewebsite != iisWebSite.Namewebsite ||
-                          foundIisWebsite.Apppollname != iisWebSite.Apppollname;
+                var hasFieldToUpdate = HasFieldToUpdate(foundIisWebsite, iisWebSite);
                 if (!hasFieldToUpdate) continue;
 
                 iisWebSite.Apppollname = foundIisWebsite.Apppollname;
                 iisWebSite.Namewebsite = foundIisWebsite.Namewebsite;
             }
+        }
 
-            ctx.SaveChanges();
-            //var newWebSites = foundWebSites.Where(s => !ctx.IISWebSite.Any(ws => ws.IISWebSiteId == s.IISId));
+        private static void DeleteIISWebSite(IQueryable<IISWebSite> toDelete)
+        {
+            foreach (var iisWebSite in toDelete)
+            {
+                iisWebSite.Enddate = DateTime.Now;
+            }
+        }
 
-            //var foundIisWebSitesToRecord = newWebSites.ToList();
-            //var newRecords = foundIisWebSitesToRecord.Select(e => new IISWebSite
-            //{
-            //    Namewebsite = e.Namewebsite,
-            //    Apppollname = e.Apppollname,
-            //    Creationdate = DateTime.Now,
-            //    IISWebSiteId = (int)e.IISId,
-            //    Iislogpath = e.IISLogPath
-            //});
+        private static bool HasFieldToUpdate(FoundIISWebSite foundIisWebsite, IISWebSite iisWebSite)
+        {
+            if (foundIisWebsite == null) throw new ArgumentNullException(nameof(foundIisWebsite));
+            if (iisWebSite == null) throw new ArgumentNullException(nameof(iisWebSite));
 
+            return !string.Equals(foundIisWebsite.Namewebsite?.Trim(), iisWebSite.Namewebsite?.Trim(), StringComparison.InvariantCultureIgnoreCase) ||
+                   !string.Equals(foundIisWebsite.Apppollname?.Trim(), iisWebSite.Apppollname?.Trim(), StringComparison.InvariantCultureIgnoreCase);
+        }
 
-            //var recordsToUpdate = ctx.IISWebSite.Where(s =>
-            //    foundWebSites.Any(fws => fws.IISId == s.IISWebSiteId && !string.Equals(s.Namewebsite, fws.Namewebsite,
-            //                                 StringComparison.InvariantCultureIgnoreCase)) && s.Enddate != null)
-            //                .ToList()
-            //    .ForEach(s =>
-            //    {
-            //        s.Namewebsite = 
-            //    });
+        protected virtual void OnOnEntityParse<T>(string entityName)
+        {
+            OnEntityParse?.Invoke(this, EventArgs.Empty);
+        }
 
-            //foreach (var iisWebSite in newRecords)
-            //    ctx.IISWebSite.Add(iisWebSite);
+        public class EntityParseEventArgs: EventArgs
+        {
+            public string EntityName { get; }
+            public Type EntityType { get; }
 
-            //ctx.SaveChanges();
+            public EntityParseEventArgs(string entityName, Type entityType)
+            {
+                EntityName = entityName;
+                EntityType = entityType;
+            }
         }
     }
 }

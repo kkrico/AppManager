@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using AppManager.Core.Interfaces;
 using AppManager.Data.Access;
@@ -33,26 +34,133 @@ namespace AppManager.Core.Service.Tests
             _appManagerService = new Mock<AppManagerService>(_uow.Object, _iisServerManagerService.Object);
         }
 
-        //[TestMethod]
-        //public void Parse_NaoDeve_InserirWebsite_JaCadastrado()
-        //{
-        //    var dados = new List<IISWebSite>
-        //    {
-        //        new IISWebSite {IISWebSiteId = 1}
-        //    };
+        [TestMethod]
+        public void Parse_NaoDeve_InserirWebsite_JaCadastrado_ComMesmoId_ComMesmoNome_ComMesmoAppPool()
+        {
+            var dados = new List<IISWebSite>
+            {
+                new IISWebSite {IISWebSiteId = 1, Apppollname =  "AppPoolName1", Iislogpath = "Path"}
+            };
 
-        //    var fakedbSet = new FakeDbSet<IISWebSite>(dados);
-        //    _ctx.Setup(s => s.IISWebSite).Returns(fakedbSet);
+            var fakedbSet = new FakeDbSet<IISWebSite>(dados);
+            _ctx.Setup(s => s.IISWebSite).Returns(fakedbSet);
 
-        //    var foundIisWebsites = new List<FoundIISWebSite>
-        //    {
-        //        new FoundIISWebSite {IISId = 1, Apppollname = "AppPoolName1", IISLogPath = "Path"},
-        //    };
-        //    _iisServerManagerService.Setup(s => s.ListWebSites()).Returns(foundIisWebsites);
-        //    _appManagerService.Object.Parse();
+            var foundIisWebsites = new List<FoundIISWebSite>
+            {
+                new FoundIISWebSite {IISId = 1, Apppollname = "AppPoolName1", IISLogPath = "Path"},
+            };
+            _iisServerManagerService.Setup(s => s.ListWebSites()).Returns(foundIisWebsites);
+            _appManagerService.Object.Parse();
 
-        //    _ctx.Verify(s => s.SaveChanges(), Times.Never());
-        //}
+            Assert.AreEqual(_ctx.Object.IISWebSite.Count(), dados.Count);
+        }
+
+        [TestMethod]
+        public void Parse_Insere_Se_AppPoolIISWebSite_For_Diferente()
+        {
+            var dados = new List<IISWebSite>
+            {
+                new IISWebSite {IISWebSiteId = 1, Apppollname =  "WebSiteNomeAppPool", Iislogpath = "Path"}
+            };
+
+            var fakedbSet = new FakeDbSet<IISWebSite>(dados);
+            _ctx.Setup(s => s.IISWebSite).Returns(fakedbSet);
+
+            var foundIisWebsites = new List<FoundIISWebSite>
+            {
+                new FoundIISWebSite {IISId = 1, Apppollname = "AppPoolName1", IISLogPath = "Path"},
+            };
+            _iisServerManagerService.Setup(s => s.ListWebSites()).Returns(foundIisWebsites);
+            _appManagerService.Object.Parse();
+
+            Assert.AreEqual(_ctx.Object.IISWebSite.First().Apppollname, foundIisWebsites.First().Apppollname);
+        }
+
+        [TestMethod]
+        public void Parse_Insere_Se_NomeIISWebSite_For_Diferente()
+        {
+            var dados = new List<IISWebSite>
+            {
+                new IISWebSite {IISWebSiteId = 1, Namewebsite =  "IISWebSiteNome", Iislogpath = "Path"}
+            };
+
+            var fakedbSet = new FakeDbSet<IISWebSite>(dados);
+            _ctx.Setup(s => s.IISWebSite).Returns(fakedbSet);
+
+            var foundIisWebsites = new List<FoundIISWebSite>
+            {
+                new FoundIISWebSite {IISId = 1, Apppollname = "AppPoolName1", IISLogPath = "Path"},
+            };
+            _iisServerManagerService.Setup(s => s.ListWebSites()).Returns(foundIisWebsites);
+            _appManagerService.Object.Parse();
+
+            Assert.AreEqual(_ctx.Object.IISWebSite.First().Namewebsite, foundIisWebsites.First().Namewebsite);
+        }
+
+        [TestMethod]
+        public void Parse_Fecha_Vigencia_Se_Nao_Encontrar()
+        {
+            var dados = new List<IISWebSite>
+            {
+                new IISWebSite {IISWebSiteId = 1, Namewebsite =  "IISWebSiteNome", Iislogpath = "Path"}
+            };
+
+            var fakedbSet = new FakeDbSet<IISWebSite>(dados);
+            _ctx.Setup(s => s.IISWebSite).Returns(fakedbSet);
+
+            var foundIisWebsites = new List<FoundIISWebSite>
+            {
+                new FoundIISWebSite {IISId = 2, Apppollname = "AppPool2"}
+            };
+            _iisServerManagerService.Setup(s => s.ListWebSites()).Returns(foundIisWebsites);
+            _appManagerService.Object.Parse();
+
+            Assert.IsNotNull(_ctx.Object.IISWebSite.First().Enddate);
+        }
+
+        [TestMethod]
+        public void Parse_Fecha_Vigencia_Somente_Vigente()
+        {
+            var dados = new List<IISWebSite>
+            {
+                new IISWebSite {IISWebSiteId = 1, Namewebsite =  "IISWebSiteNome", Iislogpath = "Path", Enddate = DateTime.Now.Date.AddDays(-99)}
+            };
+
+            var fakedbSet = new FakeDbSet<IISWebSite>(dados);
+            _ctx.Setup(s => s.IISWebSite).Returns(fakedbSet);
+
+            var foundIisWebsites = new List<FoundIISWebSite>
+            {
+                new FoundIISWebSite {IISId = 2, Apppollname = "AppPool2"}
+            };
+            _iisServerManagerService.Setup(s => s.ListWebSites()).Returns(foundIisWebsites);
+            _appManagerService.Object.Parse();
+
+            Assert.AreEqual(_ctx.Object.IISWebSite.First().Enddate, DateTime.Now.Date.AddDays(-99));
+        }
+
+        [TestMethod]
+        public void Parse_Insere_Novos_IISWebSites()
+        {
+            var dados = new List<IISWebSite>();
+
+            var fakeDbSet = new FakeDbSet<IISWebSite>(dados);
+            _ctx.Setup(s => s.IISWebSite).Returns(fakeDbSet);
+
+
+            var foundIisWebsites = new List<FoundIISWebSite>
+            {
+                new FoundIISWebSite {IISId = 2, Apppollname = "AppPool2"},
+                new FoundIISWebSite {IISId = 1, Apppollname = "AppPoolName1", IISLogPath = "Path"},
+            };
+            _iisServerManagerService.Setup(s => s.ListWebSites()).Returns(foundIisWebsites);
+            _appManagerService.Object.Parse();
+
+            Assert.IsTrue(_ctx.Object.IISWebSite.Any());
+            Assert.AreEqual(_ctx.Object.IISWebSite.Count(), foundIisWebsites.Count);
+            Assert.AreEqual(_ctx.Object.IISWebSite.First().Namewebsite, foundIisWebsites.First().Namewebsite);
+            Assert.IsNull(_ctx.Object.IISWebSite.First().Enddate);
+        }
 
         [TestMethod]
         public void Parse_NaoSalva_SeNaoAchar_Site()
@@ -85,6 +193,34 @@ namespace AppManager.Core.Service.Tests
             _appManagerService.Object.Parse();
             _ctx.Verify(s => s.SaveChanges(), Times.Never());
         }
+
+        [TestMethod]
+        public void Parse_Notifica_QueFazParseDaEntitidade_IISWEbSIte()
+        {
+            var dados = new List<IISWebSite>();
+
+            var fakeDbSet = new FakeDbSet<IISWebSite>(dados);
+            _ctx.Setup(s => s.IISWebSite).Returns(fakeDbSet);
+
+
+            var foundIisWebsites = new List<FoundIISWebSite>
+            {
+                new FoundIISWebSite {IISId = 2, Apppollname = "AppPool2"},
+                new FoundIISWebSite {IISId = 1, Apppollname = "AppPoolName1", IISLogPath = "Path"},
+            };
+            _iisServerManagerService.Setup(s => s.ListWebSites()).Returns(foundIisWebsites);
+            var parsedEntity = new List<string>();
+            _appManagerService.Object.OnEntityParse += (source, args) =>
+            {
+                var e = (AppManagerService.EntityParseEventArgs) args;
+                parsedEntity.Add(e.EntityName);
+            };
+            _appManagerService.Object.Parse();
+
+            Assert.IsTrue(parsedEntity.Any(s => s.Contains(nameof(IISApplication))));
+        }
+
+        
 
         //[TestMethod()]
         //public void ParseTest()
