@@ -148,7 +148,6 @@ namespace AppManager.Core.Service
                 };
                 newIisWebSites.Add(newIISWebSite);
 
-
                 InsertNewIISApplicationsFor(newIISWebSite, foundIisWebsite);
             }
 
@@ -157,7 +156,7 @@ namespace AppManager.Core.Service
 
         private void InsertNewIISApplicationsFor([NotNull]IISWebSite newIISWebSite, [NotNull]FoundIISWebSite foundIisWebsite)
         {
-            throw new NotImplementedException();
+            
         }
 
         /// <summary>
