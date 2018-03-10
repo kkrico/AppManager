@@ -39,7 +39,7 @@ namespace AppManager.Core.Service
         /// <param name="foundWebSites"></param>
         private void ParseWebSites([NotNull] ICollection<FoundIISWebSite> foundWebSites)
         {
-            RaiseOnEntityParsed<IISWebSite>(nameof(IISWebSite));
+            RaiseOnEntityParsed<IISWebSite>();
             IQueryable<IISWebSite> webSitesThatAlreadyExist = ListIISWebSitesThatAlreadyExist(foundWebSites);
             IQueryable<IISWebSite> toDelete = ListIISWebSitesToDelete(foundWebSites);
 
@@ -65,8 +65,6 @@ namespace AppManager.Core.Service
         {
             IEnumerable<IISWebSite> newWebSitesToSave = GenerateIISWebSite(foundWebSites);
             _ctx.IISWebSite.AddRange(newWebSitesToSave);
-
-
         }
 
         /// <summary>
@@ -95,7 +93,7 @@ namespace AppManager.Core.Service
         /// <returns></returns>
         private IQueryable<IISWebSite> ListIISWebSitesToDelete([NotNull] IEnumerable<FoundIISWebSite> foundWebSites)
         {
-            IEnumerable<int> idsOfFoundIISWebSites = GetIdsOfFoundIISWebSites(foundWebSites);
+            IEnumerable<int> idsOfFoundIISWebSites = ListIdsOfGetIdsOfFoundIISWebSites(foundWebSites);
             return _ctx.IISWebSite.Where(s => !idsOfFoundIISWebSites.Contains(s.IISWebSiteId) && s.Enddate == null);
         }
 
@@ -107,7 +105,7 @@ namespace AppManager.Core.Service
         private IQueryable<IISWebSite> ListIISWebSitesThatAlreadyExist(
             [NotNull] IEnumerable<FoundIISWebSite> foundWebSites)
         {
-            IEnumerable<int> idsOfFoundIISWebSites = GetIdsOfFoundIISWebSites(foundWebSites);
+            IEnumerable<int> idsOfFoundIISWebSites = ListIdsOfGetIdsOfFoundIISWebSites(foundWebSites);
             return _ctx.IISWebSite.Where(e => idsOfFoundIISWebSites.Contains(e.IISWebSiteId) && e.Enddate == null);
         }
 
@@ -116,9 +114,9 @@ namespace AppManager.Core.Service
         /// </summary>
         /// <param name="foundWebSites"></param>
         /// <returns></returns>
-        private static IEnumerable<int> GetIdsOfFoundIISWebSites(IEnumerable<FoundIISWebSite> foundWebSites)
+        private static IEnumerable<int> ListIdsOfGetIdsOfFoundIISWebSites(IEnumerable<FoundIISWebSite> foundWebSites)
         {
-            return foundWebSites.Select(e => (int)e.IISId);
+            return foundWebSites.Select(e => (int) e.IISId);
         }
 
         /// <summary>
@@ -129,7 +127,7 @@ namespace AppManager.Core.Service
         private IEnumerable<IISWebSite> GenerateIISWebSite([NotNull] IEnumerable<FoundIISWebSite> foundIISWebSites)
         {
             var newIisWebSites = new List<IISWebSite>();
-            IEnumerable<int> idsOfFoundIISWebSites = GetIdsOfFoundIISWebSites(foundIISWebSites);
+            IEnumerable<int> idsOfFoundIISWebSites = ListIdsOfGetIdsOfFoundIISWebSites(foundIISWebSites);
             IEnumerable<IISWebSite> webSitesThatAlreadyExist = ListIISWebSitesThatAlreadyExist(foundIISWebSites);
             IEnumerable<int> newOnes =
                 idsOfFoundIISWebSites.Except(webSitesThatAlreadyExist.Select(e => e.IISWebSiteId));
@@ -142,21 +140,34 @@ namespace AppManager.Core.Service
                     Namewebsite = foundIisWebsite.Namewebsite,
                     Apppollname = foundIisWebsite.Apppollname,
                     Creationdate = DateTime.Now,
-                    IISWebSiteId = (int)foundIisWebsite.IISId,
+                    IISWebSiteId = (int) foundIisWebsite.IISId,
                     Iislogpath = foundIisWebsite.IISLogPath,
                     PhysicalPath = foundIisWebsite.PhysicalPath
                 };
                 newIisWebSites.Add(newIISWebSite);
 
-                InsertNewIISApplicationsFor(newIISWebSite, foundIisWebsite);
+                if (foundIisWebsite.IISApplications != null)
+                    InsertNewIISApplicationsFor(newIISWebSite, foundIisWebsite.IISApplications);
             }
 
             return newIisWebSites;
         }
 
-        private void InsertNewIISApplicationsFor([NotNull]IISWebSite newIISWebSite, [NotNull]FoundIISWebSite foundIisWebsite)
+        private void InsertNewIISApplicationsFor([NotNull] IISWebSite newIISWebSite,
+            [NotNull] IEnumerable<FoundIISApplication> applications)
         {
-            
+            IEnumerable<IISApplication> newApplications = applications.Select(e => new IISApplication
+            {
+                Iiswebsite = newIISWebSite,
+                Apppollname = e.AppPoolName,
+                Creationdate = DateTime.Now,
+                Iislogpath = newIISWebSite.Iislogpath,
+                Physicalpath = e.PhysicalPath,
+                Logicalpath = e.IISLogicalPath
+            });
+
+            RaiseOnEntityParsed<IISApplication>();
+            _ctx.IISApplication.AddRange(newApplications);
         }
 
         /// <summary>
@@ -164,9 +175,9 @@ namespace AppManager.Core.Service
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="entityName"></param>
-        private void RaiseOnEntityParsed<T>(string entityName)
+        private void RaiseOnEntityParsed<T>()
         {
-            OnEntityParsed?.Invoke(entityName, typeof(T));
+            OnEntityParsed?.Invoke(typeof(T).Name, typeof(T));
         }
 
         /// <summary>
