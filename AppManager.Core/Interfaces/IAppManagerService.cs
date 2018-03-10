@@ -1,6 +1,6 @@
 ﻿namespace AppManager.Core.Service
 {
-    public interface IAppManagerService
+    public interface IAppManagerService : INotifyEntityParsed
     {
         void Parse();
     }

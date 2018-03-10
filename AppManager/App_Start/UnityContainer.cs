@@ -46,7 +46,7 @@ namespace AppManager
         /// <param name="container"></param>
         public static void RegisterTypes(IUnityContainer container)
         {
-            container.RegisterType<AppManagerDbContext, AppManagerDbContext>(
+            container.RegisterType<AppManagerDbContext, AppManagerDbContext>(new PerThreadLifetimeManager(),
                 new InjectionConstructor("DefaultConnection"));
             container.RegisterType<IUnitOfWork, UnitOfWork>(new PerThreadLifetimeManager());
 
@@ -60,27 +60,27 @@ namespace AppManager
         private static void ResolveAppManager(IUnityContainer container)
         {
             var parseStatusHub = GlobalHost.ConnectionManager.GetHubContext<ParseStatusHub>();
-            container.RegisterType<AppManagerController>(new InjectionConstructor(container.Resolve<IAppManagerService>(), parseStatusHub));
+            container.RegisterType<AppManagerController>(new PerThreadLifetimeManager(), new InjectionConstructor(container.Resolve<IAppManagerService>(), parseStatusHub));
         }
 
         private static void ResolveServerManager(IUnityContainer container)
         {
             if (string.IsNullOrEmpty(AppManagerConfig.ApplicationHostConfigFileLocation))
-                container.RegisterType<IIISServerManagerService, IISServerManagerService>();
+                container.RegisterType<IIISServerManagerService, IISServerManagerService>(new PerThreadLifetimeManager());
             else
-                container.RegisterType<IIISServerManagerService, IISServerManagerService>(new InjectionConstructor(AppManagerConfig.ApplicationHostConfigFileLocation));
+                container.RegisterType<IIISServerManagerService, IISServerManagerService>(new PerThreadLifetimeManager(),new InjectionConstructor(AppManagerConfig.ApplicationHostConfigFileLocation));
         }
 
         private static void RegisterConventions(Microsoft.Practices.Unity.UnityContainer container, IEnumerable<Assembly> assemblies = null)
         {
             foreach (var type in GetClassesFromAssemblies(assemblies))
             {
-                var interfacesToBeRegsitered = GetInterfacesToBeRegistered(type);
+                IEnumerable<Type> interfacesToBeRegsitered = GetInterfacesToBeRegistered(type);
                 AddToInternalTypeMapping(type, interfacesToBeRegsitered);
             }
 
 
-            foreach (var typeMapping in InternalTypeMapping)
+            foreach (KeyValuePair<Type, HashSet<Type>> typeMapping in InternalTypeMapping)
             {
                 if (typeMapping.Value.Count == 1)
                 {
@@ -112,7 +112,7 @@ namespace AppManager
 
         private static IEnumerable<Type> GetInterfacesToBeRegistered(Type type)
         {
-            var allInterfacesOnType = type.GetInterfaces()
+            List<Type> allInterfacesOnType = type.GetInterfaces()
                 .Select(i => i.IsGenericType ? i.GetGenericTypeDefinition() : i).ToList();
 
             return allInterfacesOnType.Except(allInterfacesOnType.SelectMany(i => i.GetInterfaces())).ToList();
@@ -127,7 +127,7 @@ namespace AppManager
 
         private static IEnumerable<Type> GetClassesFromAssemblies(IEnumerable<Assembly> assemblies = null)
         {
-            var allClasses = assemblies != null ? AllClasses.FromAssemblies(assemblies) : AllClasses.FromAssembliesInBasePath();
+            IEnumerable<Type> allClasses = assemblies != null ? AllClasses.FromAssemblies(assemblies) : AllClasses.FromAssembliesInBasePath();
             return
                 allClasses.Where(
                     n =>

@@ -5,7 +5,7 @@ namespace AppManager.Data.Access.Interfaces
 {
     public interface IRepository<T> where T : class
     {
-        IQueryable<T> GetAll();
+        IQueryable<T> List();
         T Get(object id);
         int Count();
         void Add(T entity);

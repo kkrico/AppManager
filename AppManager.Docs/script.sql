@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      Microsoft SQL Server 2008                    */
-/* Created on:     06/03/2018 20:53:37                          */
+/* Created on:     09/03/2018 13:25:09                          */
 /*==============================================================*/
 
 
@@ -286,6 +286,7 @@ create table IISWEBSITE (
    CREATIONDATE         datetime             null,
    ENDDATE              datetime             null,
    IISWEBSITEID         int                  not null,
+   PHYSICALPATH         varchar(256)         null,
    constraint PK_IISWEBSITE primary key nonclustered (IDIISWEBSITE)
 )
 go

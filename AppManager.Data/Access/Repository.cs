@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Text;
 using AppManager.Data.Access.Interfaces;
@@ -18,7 +19,7 @@ namespace AppManager.Data.Access
             Set = Context.Set<T>();
         }
 
-        public IQueryable<T> GetAll()
+        public IQueryable<T> List()
         {
             return Set;
         }
@@ -40,7 +41,7 @@ namespace AppManager.Data.Access
 
         public void Remove(T entidade)
         {
-            var dbEntityEntry = Context.Entry(entidade);
+            DbEntityEntry<T> dbEntityEntry = Context.Entry(entidade);
             if (dbEntityEntry.State != EntityState.Detached)
             {
                 dbEntityEntry.State = EntityState.Deleted;
@@ -62,7 +63,7 @@ namespace AppManager.Data.Access
 
         public void Update(T entidade)
         {
-            var entry = Context.Entry(entidade);
+            DbEntityEntry<T> entry = Context.Entry(entidade);
             if (entry.State == EntityState.Detached)
             {
                 Set.Attach(entidade);

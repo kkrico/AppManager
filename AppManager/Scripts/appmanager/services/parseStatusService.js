@@ -8,10 +8,6 @@
         var hub = new Hub("parseStatus",
             {
                 listeners: {
-                    "newConnection": function (id) {
-                        $log.log("Conected " + id);
-                        $rootScope.$apply();
-                    },
                     "onEntityParsed": function (entityName) {
                         ParseStatus.parsedEntity = entityName;
                         $log.log(entityName);

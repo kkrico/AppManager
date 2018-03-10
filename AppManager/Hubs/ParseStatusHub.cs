@@ -9,7 +9,7 @@ using Microsoft.AspNet.SignalR.Hubs;
 namespace AppManager.Hubs
 {
     [HubName("parseStatus")]
-    public class ParseStatusHub : UserConnectedHub
+    public class ParseStatusHub : Hub
     {
     }
 }

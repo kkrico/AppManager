@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using AppManager.Core.Interfaces;
 using AppManager.Core.Messages;
@@ -24,6 +23,7 @@ namespace AppManager.Core.Service
                 throw new Exception(Message.MSG01, e);
             }
         }
+
         public IISServerManagerService(string applicationHostConfigurationPath)
         {
             try
@@ -37,7 +37,7 @@ namespace AppManager.Core.Service
         }
 
         /// <summary>
-        /// Lista todos os sites do IIS encontrados no server
+        ///     Lista todos os sites do IIS encontrados no server
         /// </summary>
         /// <returns></returns>
         public ICollection<FoundIISWebSite> ListWebSites()
@@ -51,12 +51,16 @@ namespace AppManager.Core.Service
                 Namewebsite = e.Name,
                 Apppollname = e.ApplicationDefaults.ApplicationPoolName,
                 IISLogPath = e.LogFile.Directory,
+                PhysicalPath = e.Applications["/"].VirtualDirectories["/"].PhysicalPath,
+                IISApplications = e.Applications.Select(a => new FoundIISApplication
+                {
+                    IISWebSiteId = (int) e.Id,
+                    ApplicationName = a.Path,
+                    PhysicalPath = a.VirtualDirectories["/"].PhysicalPath,
+                    AppPoolName = a.ApplicationPoolName,
+                    IISLogicalPath = a.Path
+                }).ToList()
             }).ToList();
-        }
-
-        public ICollection<IISApplication> ListApplications()
-        {
-            throw new NotImplementedException();
         }
     }
 }

@@ -9,17 +9,17 @@ namespace AppManager.Test.Fake
 {
     public class FakeDbSet<T> : DbSet<T>, IDbSet<T> where T : class
     {
-        private readonly List<T> _data;
-
         public FakeDbSet()
         {
-            _data = new List<T>();
+            Local = new List<T>();
         }
 
         public FakeDbSet(List<T> data)
         {
-            _data = data;
+            Local = data;
         }
+
+        public List<T> Local { get; }
 
         public override T Find(params object[] keyValues)
         {
@@ -28,25 +28,19 @@ namespace AppManager.Test.Fake
 
         public override T Add(T item)
         {
-            _data.Add(item);
+            Local.Add(item);
             return item;
         }
 
         public override T Remove(T item)
         {
-            _data.Remove(item);
+            Local.Remove(item);
             return item;
         }
 
         public override T Attach(T item)
         {
             return null;
-        }
-
-        public T Detach(T item)
-        {
-            _data.Remove(item);
-            return item;
         }
 
         public override T Create()
@@ -59,42 +53,43 @@ namespace AppManager.Test.Fake
             return Activator.CreateInstance<TDerivedEntity>();
         }
 
-        public List<T> Local => _data;
+        Type IQueryable.ElementType => Local.AsQueryable().ElementType;
 
-        public override IEnumerable<T> AddRange(IEnumerable<T> entities)
-        {
-            _data.AddRange(entities);
-            return _data;
-        }
+        Expression IQueryable.Expression => Local.AsQueryable().Expression;
 
-        public override IEnumerable<T> RemoveRange(IEnumerable<T> entities)
-        {
-            for (int i = entities.Count() - 1; i >= 0; i--)
-            {
-                T entity = entities.ElementAt(i);
-                if (_data.Contains(entity))
-                {
-                    Remove(entity);
-                }
-            }
-
-            return this;
-        }
-
-        Type IQueryable.ElementType => _data.AsQueryable().ElementType;
-
-        Expression IQueryable.Expression => _data.AsQueryable().Expression;
-
-        IQueryProvider IQueryable.Provider => _data.AsQueryable().Provider;
+        IQueryProvider IQueryable.Provider => Local.AsQueryable().Provider;
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return _data.GetEnumerator();
+            return Local.GetEnumerator();
         }
 
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
         {
-            return _data.GetEnumerator();
+            return Local.GetEnumerator();
+        }
+
+        public T Detach(T item)
+        {
+            Local.Remove(item);
+            return item;
+        }
+
+        public override IEnumerable<T> AddRange(IEnumerable<T> entities)
+        {
+            Local.AddRange(entities);
+            return Local;
+        }
+
+        public override IEnumerable<T> RemoveRange(IEnumerable<T> entities)
+        {
+            for (var i = entities.Count() - 1; i >= 0; i--)
+            {
+                var entity = entities.ElementAt(i);
+                if (Local.Contains(entity)) Remove(entity);
+            }
+
+            return this;
         }
     }
 }

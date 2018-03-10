@@ -184,6 +184,7 @@
     <None Include="Scripts\jquery\jquery-1.6.4-vsdoc.js" />
     <Content Include="Scripts\appmanager\controllers\parseStatusController.js" />
     <Content Include="Scripts\appmanager\directives\gearDirective.js" />
+    <Content Include="Scripts\appmanager\services\appManagerService.js" />
     <Content Include="Scripts\appmanager\services\hubService.js" />
     <Content Include="Scripts\appmanager\services\logService.js" />
     <Content Include="Scripts\appmanager\services\iisWebSiteService.js" />

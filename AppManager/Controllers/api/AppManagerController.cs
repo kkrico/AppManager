@@ -27,9 +27,11 @@ namespace AppManager.Controllers.api
         /// </summary>
         /// <exception cref="NotImplementedException"></exception>
         [POST("api/AppManager/Parse")]
-        public void Parse()
+        public bool Parse()
         {
+            _appManagerService.OnEntityParsed += (name, type) => _hubContext.Clients.All.onEntityParsed(name);
             _appManagerService.Parse();
+            return true;
         }
         
         /// <summary>

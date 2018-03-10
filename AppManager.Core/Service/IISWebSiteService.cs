@@ -19,7 +19,7 @@ namespace AppManager.Core.Service
 
         public ICollection<IISWebSite> ListAllSites()
         {
-            var sites = _uow.IISWebSiteRepository.GetAll();
+            IQueryable<IISWebSite> sites = _uow.IISWebSiteRepository.List();
             return sites?.ToList() ?? new List<IISWebSite>();
         }
     }

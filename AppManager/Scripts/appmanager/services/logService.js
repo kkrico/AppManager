@@ -9,10 +9,6 @@
         var hub = new Hub("log",
             {
                 listeners: {
-                    "newConnection": function (id) {
-                        $log.log("Conected " + id);
-                        $rootScope.$apply();
-                    },
                     "doAlgo": function (n) {
                         Employees.connected.push(n);
                         $timeout(function () {

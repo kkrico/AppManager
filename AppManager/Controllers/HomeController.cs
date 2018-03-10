@@ -1,7 +1,12 @@
 ﻿using System.Linq;
 using System.Reflection;
 using System.Web.Mvc;
+using AppManager.Controllers.api;
 using AppManager.Core.Interfaces;
+using AppManager.Core.Service;
+using AppManager.Data.Access;
+using Microsoft.AspNet.SignalR;
+using Microsoft.Practices.Unity;
 
 namespace AppManager.Controllers
 {

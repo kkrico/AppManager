@@ -6,9 +6,9 @@
     function HomeController($scope, $uibModal, Site, $location, $window, URLRoot) {
 
         Site.listarSites().then(function(foundSites) {
-            //if (!foundSites.length) {
-            //    $window.location.href = URLRoot + "/Parse";
-            //}
+            if (!foundSites.length) {
+                $window.location.href = URLRoot + "/Parse";
+            }
         });
     }
 })();

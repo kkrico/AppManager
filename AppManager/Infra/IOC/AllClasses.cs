@@ -24,7 +24,7 @@ namespace AppManager.Infra.IOC
         {
             var assembly = typeof(Microsoft.Practices.Unity.UnityContainer).Assembly;
 
-            var productAttribute = assembly.GetCustomAttributes(typeof(AssemblyProductAttribute), true);
+            object[] productAttribute = assembly.GetCustomAttributes(typeof(AssemblyProductAttribute), true);
 
             if (!productAttribute.Any()) return null;
 
@@ -36,7 +36,7 @@ namespace AppManager.Infra.IOC
         {
 
             var assembly = typeof(object).Assembly;
-            var productAttribute = assembly.GetCustomAttributes(typeof(AssemblyProductAttribute), true);
+            object[] productAttribute = assembly.GetCustomAttributes(typeof(AssemblyProductAttribute), true);
 
             if (!productAttribute.Any()) return null;
 
@@ -84,7 +84,7 @@ namespace AppManager.Infra.IOC
 
             if (NetFrameworkProductName != null)
             {
-                var productAttribute = a.GetCustomAttributes(typeof(AssemblyProductAttribute), true);
+                object[] productAttribute = a.GetCustomAttributes(typeof(AssemblyProductAttribute), true);
                 if (!productAttribute.Any()) return false;
 
                 var product = (AssemblyProductAttribute)productAttribute.First();
@@ -100,7 +100,7 @@ namespace AppManager.Infra.IOC
         {
             if (UnityProductName != null)
             {
-                var productAttribute = a.GetCustomAttributes(typeof(AssemblyProductAttribute), true);
+                object[] productAttribute = a.GetCustomAttributes(typeof(AssemblyProductAttribute), true);
                 if (!productAttribute.Any()) return false;
 
                 var product = (AssemblyProductAttribute)productAttribute.First();
@@ -148,7 +148,7 @@ namespace AppManager.Infra.IOC
 
         private static IEnumerable<Assembly> GetLoadedAssemblies(bool includeSystemAssemblies, bool includeUnityAssemblies, bool includeDynamicAssemblies)
         {
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
             if (includeSystemAssemblies && includeDynamicAssemblies)
             {

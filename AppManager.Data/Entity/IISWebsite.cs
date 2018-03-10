@@ -44,6 +44,9 @@ namespace AppManager.Data.Entity
 
         [Column("ENDDATE")]
         public DateTime? Enddate { get; set; }
+        
+        [Column("PHYSICALPATH")] 
+        public string PhysicalPath { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<IISApplication> Iisapplication { get; set; }

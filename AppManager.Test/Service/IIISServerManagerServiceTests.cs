@@ -1,25 +1,21 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
-using System.Data.Entity;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using AppManager.Core.Interfaces;
-using AppManager.Core.Service;
 using AppManager.Data.Access;
 using AppManager.Data.Access.Interfaces;
 using AppManager.Data.Entity;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
 namespace AppManager.Core.Service.Tests
 {
     [TestClass]
-    public class ServicoSiteTests
+    public class IIISServerManagerServiceTests
     {
         private Mock<AppManagerDbContext> _ctx;
-        private Mock<IUnitOfWork> _uow;
         private Mock<IIISServerManagerService> _serverManager;
         private IISWebSiteService _siteService;
+        private Mock<IUnitOfWork> _uow;
 
         [TestInitialize]
         public void Setup()
@@ -28,7 +24,6 @@ namespace AppManager.Core.Service.Tests
             _uow = new Mock<IUnitOfWork>();
             _serverManager = new Mock<IIISServerManagerService>();
             _siteService = new IISWebSiteService(_uow.Object, _serverManager.Object);
-
         }
 
         [TestMethod]
@@ -36,15 +31,15 @@ namespace AppManager.Core.Service.Tests
         {
             var sitesEncontrados = new List<IISWebSite>
             {
-                new IISWebSite {Namewebsite= "A"},
-                new IISWebSite {Namewebsite= "B"}
+                new IISWebSite {Namewebsite = "A"},
+                new IISWebSite {Namewebsite = "B"}
             };
 
             var mockSiteRepostory = new Mock<IIISWebSiteRepository>();
-            mockSiteRepostory.Setup(s => s.GetAll()).Returns(sitesEncontrados.AsQueryable);
+            mockSiteRepostory.Setup(s => s.List()).Returns(sitesEncontrados.AsQueryable);
             _uow.Setup(s => s.IISWebSiteRepository).Returns(mockSiteRepostory.Object);
 
-            var sites = _siteService.ListAllSites();
+            ICollection<IISWebSite> sites = _siteService.ListAllSites();
             Assert.AreEqual(sitesEncontrados.Count, sites.Count);
             Assert.IsInstanceOfType(sites, typeof(List<IISWebSite>));
         }
@@ -56,12 +51,12 @@ namespace AppManager.Core.Service.Tests
             IQueryable<IISWebSite> sitesEncontrados = null;
 
             var mockSiteRepostory = new Mock<IIISWebSiteRepository>();
-            mockSiteRepostory.Setup(s => s.GetAll()).Returns(sitesEncontrados);
+            mockSiteRepostory.Setup(s => s.List()).Returns(sitesEncontrados);
             _uow.Setup(s => s.IISWebSiteRepository).Returns(mockSiteRepostory.Object);
 
             var servicoSite = new IISWebSiteService(_uow.Object, _serverManager.Object);
 
-            var sites = servicoSite.ListAllSites();
+            ICollection<IISWebSite> sites = servicoSite.ListAllSites();
 
             Assert.IsNotNull(sites);
             Assert.IsInstanceOfType(sites, typeof(List<IISWebSite>));
