@@ -25,7 +25,9 @@ namespace AppManager
         /// </param>
         public void Init(HttpApplication context)
         {
-            (context ?? throw new ArgumentNullException(nameof(context))).EndRequest += OnEndRequest;
+            if (context == null)
+                throw new ArgumentNullException(nameof(context));
+            context.EndRequest += OnEndRequest;
         }
 
         internal static object GetValue(object lifetimeManagerKey)
@@ -33,7 +35,7 @@ namespace AppManager
             Dictionary<object, object> dict = GetDictionary(HttpContext.Current);
 
             if (dict == null) return null;
-            return dict.TryGetValue(lifetimeManagerKey, out var obj) ? obj : null;
+            return dict.TryGetValue(lifetimeManagerKey, out object obj) ? obj : null;
         }
 
         internal static void SetValue(object lifetimeManagerKey, object value)
@@ -52,12 +54,12 @@ namespace AppManager
 
         private void OnEndRequest(object sender, EventArgs e)
         {
-            var app = (HttpApplication)sender;
+            var app = (HttpApplication) sender;
 
             Dictionary<object, object> dict = GetDictionary(app.Context);
 
             if (dict == null) return;
-            foreach (var disposable in dict.Values.OfType<IDisposable>())
+            foreach (IDisposable disposable in dict.Values.OfType<IDisposable>())
                 disposable.Dispose();
         }
 
@@ -67,7 +69,7 @@ namespace AppManager
                 throw new InvalidOperationException(
                     "The PerRequestLifetimeManager can only be used in the context of an HTTP request.Possible causes for this error are using the lifetime manager on a non-ASP.NET application, or using it in a thread that is not associated with the appropriate synchronization context.");
 
-            var dict = (Dictionary<object, object>)context.Items[ModuleKey];
+            var dict = (Dictionary<object, object>) context.Items[ModuleKey];
 
             return dict;
         }
