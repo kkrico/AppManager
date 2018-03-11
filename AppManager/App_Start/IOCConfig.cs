@@ -2,6 +2,7 @@ using System.Web.Http;
 using System.Web.Http.Dispatcher;
 using System.Web.Mvc;
 using AppManager.Infra.IOC;
+using Microsoft.Practices.Unity;
 
 namespace AppManager
 {
@@ -22,7 +23,7 @@ namespace AppManager
 
         private static void RegisterContainer(ControllerBuilder current)
         {
-            var container = UnityContainer.Instance;
+            IUnityContainer container = UnityContainer.Instance;
 
             var controllerFactory = new UnityControllerFactory(container);
             current.SetControllerFactory(controllerFactory);
@@ -30,7 +31,7 @@ namespace AppManager
 
         public static void DisposeContainers()
         {
-            var container = UnityContainer.Instance;
+            IUnityContainer container = UnityContainer.Instance;
 
             container.Dispose();
         }

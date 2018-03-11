@@ -13,26 +13,22 @@ namespace AppManager.Infra.IOC
             _container = container;
         }
 
-        protected override IEnumerable<FilterAttribute> GetActionAttributes(ControllerContext controllerContext, ActionDescriptor actionDescriptor)
+        protected override IEnumerable<FilterAttribute> GetActionAttributes(ControllerContext controllerContext,
+            ActionDescriptor actionDescriptor)
         {
-            var list = base.GetActionAttributes(controllerContext, actionDescriptor);
+            IEnumerable<FilterAttribute> list = base.GetActionAttributes(controllerContext, actionDescriptor);
 
-            foreach (var item in list)
-            {
-                this._container.BuildUp(item.GetType(), item);
-            }
+            foreach (var item in list) _container.BuildUp(item.GetType(), item);
 
             return list;
         }
 
-        protected override IEnumerable<FilterAttribute> GetControllerAttributes(ControllerContext controllerContext, ActionDescriptor actionDescriptor)
+        protected override IEnumerable<FilterAttribute> GetControllerAttributes(ControllerContext controllerContext,
+            ActionDescriptor actionDescriptor)
         {
-            var list = base.GetControllerAttributes(controllerContext, actionDescriptor);
+            IEnumerable<FilterAttribute> list = base.GetControllerAttributes(controllerContext, actionDescriptor);
 
-            foreach (var item in list)
-            {
-                this._container.BuildUp(item.GetType(), item);
-            }
+            foreach (var item in list) _container.BuildUp(item.GetType(), item);
 
             return list;
         }

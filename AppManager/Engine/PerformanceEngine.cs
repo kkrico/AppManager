@@ -7,6 +7,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using AppManager.Core.Interfaces;
+using AppManager.Data.Access;
+using AppManager.Data.Access.Interfaces;
 using AppManager.Hubs;
 using Microsoft.AspNet.SignalR;
 using Microsoft.Practices.Unity;
@@ -26,8 +28,11 @@ namespace AppManager.Engine
 
         private PerformanceEngine()
         {
-            _iiisWebSiteService = UnityContainer.Instance.Resolve<IIISWebSiteService>();
-            _hub = GlobalHost.ConnectionManager.GetHubContext<LogHub>();
+            _iiisWebSiteService = UnityContainer.Instance.Resolve<IIISWebSiteService>(new ResolverOverride[]
+            {
+                new DependencyOverride(typeof(IUnitOfWork), new UnitOfWork(new AppManagerDbContext("DefaulConnection"))), 
+            });
+            _hub = UnityContainer.Instance.Resolve<IHubContext>(nameof(LogHub));
 
 
             //var fileSystemWatcher = new FileSystemWatcher

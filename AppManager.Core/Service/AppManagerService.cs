@@ -49,7 +49,6 @@ namespace AppManager.Core.Service
 
             InsertNewIISWebSites(foundWebSites);
             ParseApplications(foundWebSites);
-
             _ctx.SaveChanges();
         }
 

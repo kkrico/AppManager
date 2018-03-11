@@ -5,6 +5,7 @@ using System.Web;
 using System.Web.Http;
 using AppManager.Core.Interfaces;
 using AppManager.Core.Service;
+using AppManager.Data.Access;
 using AttributeRouting;
 using AttributeRouting.Web.Http;
 using Microsoft.AspNet.SignalR;
@@ -15,6 +16,7 @@ namespace AppManager.Controllers.api
     {
         private readonly IAppManagerService _appManagerService;
         private readonly IHubContext _hubContext;
+        private readonly AppManagerDbContext _appManagerDbContext;
 
         public AppManagerController(IAppManagerService appManagerService,IHubContext hubContext)
         {
