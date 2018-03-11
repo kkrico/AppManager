@@ -35,7 +35,8 @@ namespace AppManager
             Dictionary<object, object> dict = GetDictionary(HttpContext.Current);
 
             if (dict == null) return null;
-            return dict.TryGetValue(lifetimeManagerKey, out object obj) ? obj : null;
+            object obj;
+            return dict.TryGetValue(lifetimeManagerKey, out obj) ? obj : null;
         }
 
         internal static void SetValue(object lifetimeManagerKey, object value)
