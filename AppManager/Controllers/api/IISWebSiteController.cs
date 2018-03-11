@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Web.Http;
 using AppManager.Core.Interfaces;
 using AppManager.Data.Entity;
@@ -10,7 +7,7 @@ using AppManager.Data.Entity;
 namespace AppManager.Controllers.api
 {
     /// <summary>
-    /// Operacoes relativas a site
+    ///     Operacoes relativas a site
     /// </summary>
     public class IISWebSiteController : ApiController
     {
@@ -20,8 +17,9 @@ namespace AppManager.Controllers.api
         {
             _iiisWebSiteService = iiisWebSiteService;
         }
+
         /// <summary>
-        /// Lista os sites no servidor configurado
+        ///     Lista os sites no servidor configurado
         /// </summary>
         /// <returns></returns>
         public IEnumerable<IISWebSite> Get()

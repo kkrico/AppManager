@@ -2,7 +2,7 @@
 
 namespace AppManager.Data.Access.Interfaces
 {
-    public interface IApplicationRepository: IRepository<Application>
+    public interface IApplicationRepository : IRepository<Application>
     {
     }
 }

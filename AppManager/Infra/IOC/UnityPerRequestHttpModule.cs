@@ -60,7 +60,7 @@ namespace AppManager
             Dictionary<object, object> dict = GetDictionary(app.Context);
 
             if (dict == null) return;
-            foreach (IDisposable disposable in dict.Values.OfType<IDisposable>())
+            foreach (var disposable in dict.Values.OfType<IDisposable>())
                 disposable.Dispose();
         }
 

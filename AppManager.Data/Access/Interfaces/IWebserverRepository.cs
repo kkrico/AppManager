@@ -2,7 +2,7 @@
 
 namespace AppManager.Data.Access.Interfaces
 {
-    public interface IWebserverRepository: IRepository<Webserver>
+    public interface IWebserverRepository : IRepository<Webserver>
     {
     }
 }

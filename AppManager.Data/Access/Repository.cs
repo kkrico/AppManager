@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.Entity;
+﻿using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
-using System.Text;
 using AppManager.Data.Access.Interfaces;
 
 namespace AppManager.Data.Access
@@ -69,10 +66,10 @@ namespace AppManager.Data.Access
                 Set.Attach(entidade);
                 entry = Context.Entry(entidade);
             }
+
             entry.State = EntityState.Modified;
         }
 
         public DbSet<T> DbSet => Set;
     }
-
 }

@@ -2,7 +2,7 @@
 
 namespace AppManager.Data.Access.Interfaces
 {
-    public interface ILogentryRepository: IRepository<Logentry>
+    public interface ILogentryRepository : IRepository<Logentry>
     {
     }
 }

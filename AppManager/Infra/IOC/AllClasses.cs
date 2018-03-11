@@ -4,21 +4,20 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Security;
-using Microsoft.Practices.Unity;
 using Microsoft.Practices.Unity.Utility;
 
 namespace AppManager.Infra.IOC
 {
     public class AllClasses
     {
+        private static readonly string NetFrameworkProductName;
+        private static readonly string UnityProductName;
+
         static AllClasses()
         {
             NetFrameworkProductName = GetNetFrameworkProductName();
             UnityProductName = GetUnityProductName();
         }
-
-        private static readonly string NetFrameworkProductName;
-        private static readonly string UnityProductName;
 
         private static string GetUnityProductName()
         {
@@ -28,33 +27,38 @@ namespace AppManager.Infra.IOC
 
             if (!productAttribute.Any()) return null;
 
-            var unity = (AssemblyProductAttribute)productAttribute.First();
+            var unity = (AssemblyProductAttribute) productAttribute.First();
             return unity.Product;
         }
 
         private static string GetNetFrameworkProductName()
         {
-
             var assembly = typeof(object).Assembly;
             object[] productAttribute = assembly.GetCustomAttributes(typeof(AssemblyProductAttribute), true);
 
             if (!productAttribute.Any()) return null;
 
-            var assemblyProductAttribute = (AssemblyProductAttribute)productAttribute.First();
+            var assemblyProductAttribute = (AssemblyProductAttribute) productAttribute.First();
             return assemblyProductAttribute.Product;
         }
 
-        public static IEnumerable<Type> FromLoadedAssemblies(bool includeSystemAssemblies = false, bool includeUnityAssemblies = false, bool includeDynamicAssemblies = false, bool skipOnError = true)
+        public static IEnumerable<Type> FromLoadedAssemblies(bool includeSystemAssemblies = false,
+            bool includeUnityAssemblies = false, bool includeDynamicAssemblies = false, bool skipOnError = true)
         {
-            return FromCheckedAssemblies(GetLoadedAssemblies(includeSystemAssemblies, includeUnityAssemblies, includeDynamicAssemblies), skipOnError);
+            return FromCheckedAssemblies(
+                GetLoadedAssemblies(includeSystemAssemblies, includeUnityAssemblies, includeDynamicAssemblies),
+                skipOnError);
         }
 
-        public static IEnumerable<Type> FromAssembliesInBasePath(bool includeSystemAssemblies = false, bool includeUnityAssemblies = false, bool skipOnError = true)
+        public static IEnumerable<Type> FromAssembliesInBasePath(bool includeSystemAssemblies = false,
+            bool includeUnityAssemblies = false, bool skipOnError = true)
         {
-            return FromCheckedAssemblies(GetAssembliesInBasePath(includeSystemAssemblies, includeUnityAssemblies, skipOnError), skipOnError);
+            return FromCheckedAssemblies(
+                GetAssembliesInBasePath(includeSystemAssemblies, includeUnityAssemblies, skipOnError), skipOnError);
         }
 
-        private static IEnumerable<Assembly> GetAssembliesInBasePath(bool includeSystemAssemblies, bool includeUnityAssemblies, bool skipOnError)
+        private static IEnumerable<Assembly> GetAssembliesInBasePath(bool includeSystemAssemblies,
+            bool includeUnityAssemblies, bool skipOnError)
         {
             string basePath;
 
@@ -65,10 +69,7 @@ namespace AppManager.Infra.IOC
             }
             catch (SecurityException)
             {
-                if (!skipOnError)
-                {
-                    throw;
-                }
+                if (!skipOnError) throw;
 
                 return new Assembly[0];
             }
@@ -81,19 +82,16 @@ namespace AppManager.Infra.IOC
 
         private static bool IsSystemAssembly(Assembly a)
         {
-
             if (NetFrameworkProductName != null)
             {
                 object[] productAttribute = a.GetCustomAttributes(typeof(AssemblyProductAttribute), true);
                 if (!productAttribute.Any()) return false;
 
-                var product = (AssemblyProductAttribute)productAttribute.First();
+                var product = (AssemblyProductAttribute) productAttribute.First();
                 return string.Compare(NetFrameworkProductName, product.Product, StringComparison.Ordinal) == 0;
             }
-            else
-            {
-                return false;
-            }
+
+            return false;
         }
 
         private static bool IsUnityAssembly(Assembly a)
@@ -103,13 +101,11 @@ namespace AppManager.Infra.IOC
                 object[] productAttribute = a.GetCustomAttributes(typeof(AssemblyProductAttribute), true);
                 if (!productAttribute.Any()) return false;
 
-                var product = (AssemblyProductAttribute)productAttribute.First();
+                var product = (AssemblyProductAttribute) productAttribute.First();
                 return string.Compare(UnityProductName, product.Product, StringComparison.Ordinal) == 0;
             }
-            else
-            {
-                return false;
-            }
+
+            return false;
         }
 
         private static IEnumerable<string> GetAssemblyNames(string path, bool skipOnError)
@@ -120,10 +116,8 @@ namespace AppManager.Infra.IOC
             }
             catch (Exception e)
             {
-                if (!(skipOnError && (e is DirectoryNotFoundException || e is IOException || e is SecurityException || e is UnauthorizedAccessException)))
-                {
-                    throw;
-                }
+                if (!(skipOnError && (e is DirectoryNotFoundException || e is IOException || e is SecurityException ||
+                                      e is UnauthorizedAccessException))) throw;
 
                 return new string[0];
             }
@@ -137,25 +131,23 @@ namespace AppManager.Infra.IOC
             }
             catch (Exception e)
             {
-                if (!(skipOnError && (e is FileNotFoundException || e is FileLoadException || e is BadImageFormatException)))
-                {
-                    throw;
-                }
+                if (!(skipOnError &&
+                      (e is FileNotFoundException || e is FileLoadException || e is BadImageFormatException))) throw;
 
                 return null;
             }
         }
 
-        private static IEnumerable<Assembly> GetLoadedAssemblies(bool includeSystemAssemblies, bool includeUnityAssemblies, bool includeDynamicAssemblies)
+        private static IEnumerable<Assembly> GetLoadedAssemblies(bool includeSystemAssemblies,
+            bool includeUnityAssemblies, bool includeDynamicAssemblies)
         {
             Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
-            if (includeSystemAssemblies && includeDynamicAssemblies)
-            {
-                return assemblies;
-            }
+            if (includeSystemAssemblies && includeDynamicAssemblies) return assemblies;
 
-            return assemblies.Where(a => (includeDynamicAssemblies || !a.IsDynamic) && (includeSystemAssemblies || !IsSystemAssembly(a)) && (includeUnityAssemblies || !IsUnityAssembly(a)));
+            return assemblies.Where(a =>
+                (includeDynamicAssemblies || !a.IsDynamic) && (includeSystemAssemblies || !IsSystemAssembly(a)) &&
+                (includeUnityAssemblies || !IsUnityAssembly(a)));
         }
 
         public static IEnumerable<Type> FromAssemblies(params Assembly[] assemblies)
@@ -188,10 +180,7 @@ namespace AppManager.Infra.IOC
                     }
                     catch (ReflectionTypeLoadException e)
                     {
-                        if (!skipOnError)
-                        {
-                            throw;
-                        }
+                        if (!skipOnError) throw;
 
                         types = e.Types.TakeWhile(t => t != null);
                     }
@@ -203,12 +192,8 @@ namespace AppManager.Infra.IOC
         private static IEnumerable<Assembly> CheckAssemblies(IEnumerable<Assembly> assemblies)
         {
             foreach (var assembly in assemblies)
-            {
                 if (assembly == null)
-                {
                     throw new ArgumentException("Null", "assemblies");
-                }
-            }
 
             return assemblies;
         }

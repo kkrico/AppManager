@@ -2,7 +2,7 @@
 
 namespace AppManager.Data.Access.Interfaces
 {
-    public interface IIISApplicationRepository: IRepository<IISApplication>
+    public interface IIISApplicationRepository : IRepository<IISApplication>
     {
     }
 }

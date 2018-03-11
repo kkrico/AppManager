@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace AppManager.Data.Entity
 {
     [Table("IISAPPLICATIONSOAPSERVICE")]
-    public partial class IISApplicationSoapService
+    public class IISApplicationSoapService
     {
         [Key]
         [Column("IDIISAPPLICATIONSOAPSERVICE")]

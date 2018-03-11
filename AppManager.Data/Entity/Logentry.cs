@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace AppManager.Data.Entity
 {
     [Table("LOGENTRY")]
-    public partial class Logentry
+    public class Logentry
     {
         [Key]
         [Column("IDLOGENTRY")]

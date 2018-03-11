@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
+﻿using System.ComponentModel;
 
 namespace AppManager.Data.Entity
 {
@@ -10,7 +6,6 @@ namespace AppManager.Data.Entity
     {
         [Description("Roda a aplicação em modo externo: Algumas funcionalidades podem não funcionar")]
         External,
-        [Description("Modo interno")]
-        Internal
+        [Description("Modo interno")] Internal
     }
 }

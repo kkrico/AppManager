@@ -2,7 +2,7 @@
 
 namespace AppManager.Data.Access.Interfaces
 {
-    public interface IIISApplicationSoapServiceRepository: IRepository<IISApplicationSoapService>
+    public interface IIISApplicationSoapServiceRepository : IRepository<IISApplicationSoapService>
     {
     }
 }

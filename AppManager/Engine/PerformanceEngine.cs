@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
 using AppManager.Core.Interfaces;
 using AppManager.Data.Access;
 using AppManager.Data.Access.Interfaces;
@@ -16,22 +12,22 @@ using Microsoft.Practices.Unity;
 namespace AppManager.Engine
 {
     /// <summary>
-    /// Performance Engine  ¯\_(ツ)_/¯
+    ///     Performance Engine  ¯\_(ツ)_/¯
     /// </summary>
     public class PerformanceEngine
     {
-        private readonly IHubContext _hub;
         private static readonly Lazy<PerformanceEngine> InstanceHolder =
             new Lazy<PerformanceEngine>(() => new PerformanceEngine());
+
+        private readonly IHubContext _hub;
 
         private IIISWebSiteService _iiisWebSiteService;
 
         private PerformanceEngine()
         {
-            _iiisWebSiteService = UnityContainer.Instance.Resolve<IIISWebSiteService>(new ResolverOverride[]
-            {
-                new DependencyOverride(typeof(IUnitOfWork), new UnitOfWork(new AppManagerDbContext("DefaulConnection"))), 
-            });
+            _iiisWebSiteService = UnityContainer.Instance.Resolve<IIISWebSiteService>(
+                new DependencyOverride(typeof(IUnitOfWork),
+                    new UnitOfWork(new AppManagerDbContext("DefaulConnection"))));
             _hub = UnityContainer.Instance.Resolve<IHubContext>(nameof(LogHub));
 
 
@@ -53,6 +49,9 @@ namespace AppManager.Engine
             //fileSystemWatcher.Renamed += OnRenamed;
         }
 
+
+        public static PerformanceEngine Instance => InstanceHolder.Value;
+
         private void OnChanged(object sender, FileSystemEventArgs e)
         {
             _hub.Clients.All.doAlgo("Changed");
@@ -73,9 +72,6 @@ namespace AppManager.Engine
             _hub.Clients.All.doAlgo("Renamed");
         }
 
-
-        public static PerformanceEngine Instance => InstanceHolder.Value;
-
         public Task IniciarMonitoramento()
         {
             var rand = new Random();
@@ -86,7 +82,5 @@ namespace AppManager.Engine
                 _hub.Clients.All.doAlgo(n);
             }
         }
-
-        
     }
 }

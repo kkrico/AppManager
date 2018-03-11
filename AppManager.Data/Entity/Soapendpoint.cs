@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace AppManager.Data.Entity
 {
     [Table("SOAPENDPOINT")]
-    public partial class SoapEndpoint
+    public class SoapEndpoint
     {
         [Key]
         [Column("IDSOAPENDPOINT")]

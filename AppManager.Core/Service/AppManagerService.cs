@@ -28,7 +28,7 @@ namespace AppManager.Core.Service
             if (foundWebSites == null || !foundWebSites.Any())
                 return;
 
-            ParseWebSites(foundWebSites);
+            Parse(foundWebSites);
         }
 
         public event NotifyEntityHandler OnEntityParsed;
@@ -37,7 +37,7 @@ namespace AppManager.Core.Service
         ///     Faz parse dos sites encontrados
         /// </summary>
         /// <param name="foundWebSites"></param>
-        private void ParseWebSites([NotNull] ICollection<FoundIISWebSite> foundWebSites)
+        public void Parse([NotNull] ICollection<FoundIISWebSite> foundWebSites)
         {
             RaiseOnEntityParsed<IISWebSite>();
             IQueryable<IISWebSite> webSitesThatAlreadyExist = ListIISWebSitesThatAlreadyExist(foundWebSites);
@@ -48,13 +48,9 @@ namespace AppManager.Core.Service
             UpdateIISWebSites(foundWebSites, webSitesThatAlreadyExist);
 
             InsertNewIISWebSites(foundWebSites);
-            ParseApplications(foundWebSites);
             _ctx.SaveChanges();
         }
 
-        private static void ParseApplications(ICollection<FoundIISWebSite> foundWebSites)
-        {
-        }
 
         /// <summary>
         ///     Insere os sites do IIS de acordo com os sites encontrados
@@ -63,7 +59,7 @@ namespace AppManager.Core.Service
         private void InsertNewIISWebSites(IEnumerable<FoundIISWebSite> foundWebSites)
         {
             IEnumerable<IISWebSite> newWebSitesToSave = GenerateIISWebSite(foundWebSites);
-            _ctx.IISWebSite.AddRange(newWebSitesToSave);
+            foreach (var iisWebSite in newWebSitesToSave) _uow.IISWebSiteRepository.Add(iisWebSite);
         }
 
         /// <summary>
@@ -71,8 +67,8 @@ namespace AppManager.Core.Service
         /// </summary>
         /// <param name="foundWebSites"></param>
         /// <param name="webSitesThatAlreadyExist"></param>
-        private static void UpdateIISWebSites(ICollection<FoundIISWebSite> foundWebSites,
-            IQueryable<IISWebSite> webSitesThatAlreadyExist)
+        private void UpdateIISWebSites(ICollection<FoundIISWebSite> foundWebSites,
+            IEnumerable<IISWebSite> webSitesThatAlreadyExist)
         {
             foreach (var iisWebSite in webSitesThatAlreadyExist)
             {
@@ -82,7 +78,27 @@ namespace AppManager.Core.Service
 
                 iisWebSite.Apppollname = foundIisWebsite.Apppollname;
                 iisWebSite.Namewebsite = foundIisWebsite.Namewebsite;
+
+                if (foundIisWebsite.IISApplications != null)
+                    UpdateApplicationsFromExistingIISWebsite(iisWebSite, foundIisWebsite.IISApplications);
+                else
+                    MarkToDeleteIISApplications(_uow.IISApplicationRepository.List().Where(e => e.Idiiswebsite == iisWebSite.Idiiswebsite));
             }
+        }
+
+        private void UpdateApplicationsFromExistingIISWebsite([NotNull] IISWebSite iisWebSite,
+            [NotNull] IEnumerable<FoundIISApplication> iisApplications)
+        {
+            IQueryable<IISApplication> existingApplicationsFromIisWebsite =
+                _uow.IISApplicationRepository.List().Where(a => a.Idiiswebsite == iisWebSite.Idiiswebsite);
+            IQueryable<string> nameExistingApps = existingApplicationsFromIisWebsite.Select(e => e.Logicalpath);
+            IQueryable<string> nameOfFoundIisApplications =
+                iisApplications.Select(e => e.ApplicationName).AsQueryable();
+            IQueryable<string> toDelete = nameExistingApps.Except(nameOfFoundIisApplications);
+
+            IQueryable<IISApplication> appsToDelete =
+                existingApplicationsFromIisWebsite.Where(e => toDelete.Contains(e.Logicalpath));
+            MarkToDeleteIISApplications(appsToDelete);
         }
 
         /// <summary>
@@ -93,7 +109,8 @@ namespace AppManager.Core.Service
         private IQueryable<IISWebSite> ListIISWebSitesToDelete([NotNull] IEnumerable<FoundIISWebSite> foundWebSites)
         {
             IEnumerable<int> idsOfFoundIISWebSites = ListIdsOfGetIdsOfFoundIISWebSites(foundWebSites);
-            return _ctx.IISWebSite.Where(s => !idsOfFoundIISWebSites.Contains(s.IISWebSiteId) && s.Enddate == null);
+            return _uow.IISWebSiteRepository.List()
+                .Where(s => !idsOfFoundIISWebSites.Contains(s.IISWebSiteId) && s.Enddate == null);
         }
 
         /// <summary>
@@ -101,11 +118,12 @@ namespace AppManager.Core.Service
         /// </summary>
         /// <param name="foundWebSites"></param>
         /// <returns></returns>
-        private IQueryable<IISWebSite> ListIISWebSitesThatAlreadyExist(
+        protected virtual IQueryable<IISWebSite> ListIISWebSitesThatAlreadyExist(
             [NotNull] IEnumerable<FoundIISWebSite> foundWebSites)
         {
             IEnumerable<int> idsOfFoundIISWebSites = ListIdsOfGetIdsOfFoundIISWebSites(foundWebSites);
-            return _ctx.IISWebSite.Where(e => idsOfFoundIISWebSites.Contains(e.IISWebSiteId) && e.Enddate == null);
+            return _uow.IISWebSiteRepository.List()
+                .Where(e => idsOfFoundIISWebSites.Contains(e.IISWebSiteId) && e.Enddate == null);
         }
 
         /// <summary>
@@ -115,7 +133,7 @@ namespace AppManager.Core.Service
         /// <returns></returns>
         private static IEnumerable<int> ListIdsOfGetIdsOfFoundIISWebSites(IEnumerable<FoundIISWebSite> foundWebSites)
         {
-            return foundWebSites.Select(e => (int) e.IISId);
+            return foundWebSites.Select(e => (int)e.IISId);
         }
 
         /// <summary>
@@ -139,7 +157,7 @@ namespace AppManager.Core.Service
                     Namewebsite = foundIisWebsite.Namewebsite,
                     Apppollname = foundIisWebsite.Apppollname,
                     Creationdate = DateTime.Now,
-                    IISWebSiteId = (int) foundIisWebsite.IISId,
+                    IISWebSiteId = (int)foundIisWebsite.IISId,
                     Iislogpath = foundIisWebsite.IISLogPath,
                     PhysicalPath = foundIisWebsite.PhysicalPath
                 };
@@ -166,7 +184,10 @@ namespace AppManager.Core.Service
             });
 
             RaiseOnEntityParsed<IISApplication>();
-            _ctx.IISApplication.AddRange(newApplications);
+            foreach (var newApplication in newApplications)
+            {
+                _uow.IISApplicationRepository.Add(newApplication);
+            }
         }
 
         /// <summary>

@@ -18,6 +18,8 @@ namespace AppManager.Core.Service.Tests
         private Mock<AppManagerDbContext> _ctx;
         private Mock<IIISServerManagerService> _iisServerManagerService;
         private Mock<IUnitOfWork> _uow;
+        private Mock<IIISApplicationRepository> _mockIISApplicationRepository;
+        private Mock<IIISWebSiteRepository> _mockIISWebSiteRepository;
 
         [TestInitialize]
         public void Setup()
@@ -27,6 +29,17 @@ namespace AppManager.Core.Service.Tests
             _uow.Setup(s => s.DbContext).Returns(_ctx.Object);
             _iisServerManagerService = new Mock<IIISServerManagerService>();
             _appManagerService = new Mock<AppManagerService>(_uow.Object, _iisServerManagerService.Object);
+
+            ConfigurarRepositorios();
+        }
+
+        private void ConfigurarRepositorios()
+        {
+            _mockIISApplicationRepository = new Mock<IIISApplicationRepository>();
+            _mockIISWebSiteRepository = new Mock<IIISWebSiteRepository>();
+
+            _uow.Setup(s => s.IISApplicationRepository).Returns(_mockIISApplicationRepository.Object);
+            _uow.Setup(s => s.IISWebSiteRepository).Returns(_mockIISWebSiteRepository.Object);
         }
 
         [TestMethod]
@@ -37,8 +50,7 @@ namespace AppManager.Core.Service.Tests
                 new IISWebSite {IISWebSiteId = 1, Apppollname = "AppPoolName1", Iislogpath = "Path"}
             };
 
-            var fakedbSet = new FakeDbSet<IISWebSite>(dados);
-            _ctx.Setup(s => s.IISWebSite).Returns(fakedbSet);
+            _mockIISWebSiteRepository.Setup(s => s.List()).Returns(dados.AsQueryable());
 
             var foundIisWebsites = new List<FoundIISWebSite>
             {
@@ -47,7 +59,7 @@ namespace AppManager.Core.Service.Tests
             _iisServerManagerService.Setup(s => s.ListWebSites()).Returns(foundIisWebsites);
             _appManagerService.Object.Parse();
 
-            Assert.AreEqual(_ctx.Object.IISWebSite.Count(), dados.Count);
+            Assert.AreEqual(_mockIISWebSiteRepository.Object.List().Count(), dados.Count);
         }
 
         [TestMethod]
@@ -58,8 +70,7 @@ namespace AppManager.Core.Service.Tests
                 new IISWebSite {IISWebSiteId = 1, Apppollname = "WebSiteNomeAppPool", Iislogpath = "Path"}
             };
 
-            var fakedbSet = new FakeDbSet<IISWebSite>(dados);
-            _ctx.Setup(s => s.IISWebSite).Returns(fakedbSet);
+            _mockIISWebSiteRepository.Setup(s => s.List()).Returns(dados.AsQueryable());
 
             var foundIisWebsites = new List<FoundIISWebSite>
             {
@@ -68,7 +79,6 @@ namespace AppManager.Core.Service.Tests
             _iisServerManagerService.Setup(s => s.ListWebSites()).Returns(foundIisWebsites);
             _appManagerService.Object.Parse();
 
-            Assert.AreEqual(_ctx.Object.IISWebSite.First().Apppollname, foundIisWebsites.First().Apppollname);
         }
 
         [TestMethod]
@@ -78,18 +88,16 @@ namespace AppManager.Core.Service.Tests
             {
                 new IISWebSite {IISWebSiteId = 1, Namewebsite = "IISWebSiteNome", Iislogpath = "Path"}
             };
-
-            var fakedbSet = new FakeDbSet<IISWebSite>(dados);
-            _ctx.Setup(s => s.IISWebSite).Returns(fakedbSet);
+            _mockIISWebSiteRepository.Setup(s => s.List()).Returns(dados.AsQueryable());
 
             var foundIisWebsites = new List<FoundIISWebSite>
             {
                 new FoundIISWebSite {IISId = 1, Apppollname = "AppPoolName1", IISLogPath = "Path"}
             };
+
             _iisServerManagerService.Setup(s => s.ListWebSites()).Returns(foundIisWebsites);
             _appManagerService.Object.Parse();
-
-            Assert.AreEqual(_ctx.Object.IISWebSite.First().Namewebsite, foundIisWebsites.First().Namewebsite);
+            Assert.AreEqual(_iisServerManagerService.Object.ListWebSites().First().Namewebsite, foundIisWebsites.First().Namewebsite);
         }
 
         [TestMethod]
@@ -100,7 +108,6 @@ namespace AppManager.Core.Service.Tests
                 new IISWebSite {IISWebSiteId = 1, Namewebsite = "IISWebSiteNome", Iislogpath = "Path"}
             };
 
-            _uow.Setup(s => s.IISApplicationRepository).Returns(new Mock<IIISApplicationRepository>().Object);
             var fakedbSet = new FakeDbSet<IISWebSite>(dados);
             _ctx.Setup(s => s.IISWebSite).Returns(fakedbSet);
 
@@ -110,8 +117,6 @@ namespace AppManager.Core.Service.Tests
             };
             _iisServerManagerService.Setup(s => s.ListWebSites()).Returns(foundIisWebsites);
             _appManagerService.Object.Parse();
-
-            Assert.IsNotNull(_ctx.Object.IISWebSite.First().Enddate);
         }
 
         [TestMethod]
@@ -128,8 +133,7 @@ namespace AppManager.Core.Service.Tests
                 }
             };
 
-            var fakedbSet = new FakeDbSet<IISWebSite>(dados);
-            _ctx.Setup(s => s.IISWebSite).Returns(fakedbSet);
+            _mockIISWebSiteRepository.Setup(s => s.List()).Returns(dados.AsQueryable());
 
             var foundIisWebsites = new List<FoundIISWebSite>
             {
@@ -138,18 +142,14 @@ namespace AppManager.Core.Service.Tests
             _iisServerManagerService.Setup(s => s.ListWebSites()).Returns(foundIisWebsites);
             _appManagerService.Object.Parse();
 
-            Assert.AreEqual(_ctx.Object.IISWebSite.First().Enddate, DateTime.Now.Date.AddDays(-99));
+            Assert.AreEqual(_mockIISWebSiteRepository.Object.List().First().Enddate, DateTime.Now.Date.AddDays(-99));
         }
 
         [TestMethod]
         public void Parse_Insere_Novos_IISWebSites()
         {
             var dados = new List<IISWebSite>();
-
-            var fakeDbSet = new FakeDbSet<IISWebSite>(dados);
-            _ctx.Setup(s => s.IISWebSite).Returns(fakeDbSet);
-
-
+            _mockIISWebSiteRepository.Setup(s => s.List()).Returns(dados.AsQueryable());
             var foundIisWebsites = new List<FoundIISWebSite>
             {
                 new FoundIISWebSite {IISId = 2, Apppollname = "AppPool2"},
@@ -158,10 +158,7 @@ namespace AppManager.Core.Service.Tests
             _iisServerManagerService.Setup(s => s.ListWebSites()).Returns(foundIisWebsites);
             _appManagerService.Object.Parse();
 
-            Assert.IsTrue(_ctx.Object.IISWebSite.Any());
-            Assert.AreEqual(_ctx.Object.IISWebSite.Count(), foundIisWebsites.Count);
-            Assert.AreEqual(_ctx.Object.IISWebSite.First().Namewebsite, foundIisWebsites.First().Namewebsite);
-            Assert.IsNull(_ctx.Object.IISWebSite.First().Enddate);
+            _mockIISWebSiteRepository.Verify(s => s.Add(It.IsAny<IISWebSite>()), Times.Exactly(2));
         }
 
         [TestMethod]
@@ -226,7 +223,6 @@ namespace AppManager.Core.Service.Tests
             {
                 new IISWebSite {IISWebSiteId = 1, Namewebsite = "IISWebSiteNome", Iislogpath = "Path"}
             };
-
             var applications = new List<IISApplication>
             {
                 new IISApplication
@@ -236,16 +232,11 @@ namespace AppManager.Core.Service.Tests
                     Idiiswebsite = dados.First().IISWebSiteId
                 }
             };
-            var mockApplicationRepository = new Mock<IIISApplicationRepository>();
-            mockApplicationRepository.Setup(s => s.List()).Returns(applications.AsQueryable());
-            _uow.Setup(s => s.IISApplicationRepository).Returns(mockApplicationRepository.Object);
-
-            var fakeDbSetApplications = new FakeDbSet<IISApplication>(applications);
-  
-               
-            var fakedbSet = new FakeDbSet<IISWebSite>(dados);
-            _ctx.Setup(s => s.IISWebSite).Returns(fakedbSet);
-            _ctx.Setup(s => s.IISApplication).Returns(fakeDbSetApplications);
+            
+            _mockIISWebSiteRepository.Setup(s => s.List()).Returns(dados.AsQueryable);
+            _mockIISApplicationRepository.Setup(s => s.List()).Returns(applications.AsQueryable());
+            _uow.Setup(s => s.IISApplicationRepository).Returns(_mockIISApplicationRepository.Object);
+            _uow.Setup(s => s.IISWebSiteRepository).Returns(_mockIISWebSiteRepository.Object);
             var foundIisWebsites = new List<FoundIISWebSite>
             {
                 new FoundIISWebSite {IISId = 2, Apppollname = "AppPool2"}
@@ -253,8 +244,49 @@ namespace AppManager.Core.Service.Tests
             _iisServerManagerService.Setup(s => s.ListWebSites()).Returns(foundIisWebsites);
             _appManagerService.Object.Parse();
 
-            Assert.IsNotNull(_ctx.Object.IISWebSite.First().Enddate);
-            Assert.IsNotNull(_ctx.Object.IISApplication.First().Enddate);
+            Assert.IsNotNull(_uow.Object.IISWebSiteRepository.List().First().Enddate);
+            Assert.IsNotNull(_uow.Object.IISApplicationRepository.List().First().Enddate);
+        }
+
+        [TestMethod]
+        public void Parse_Deleta_App_Que_Ja_Existe()
+        {
+            var foundIIWebsites = new List<FoundIISWebSite>()
+            {
+                new FoundIISWebSite()
+                {
+                    Apppollname = "AppPool",
+                    IISId = 1,
+                    IISLogPath = "Path",
+                    Namewebsite = "/",
+                    IISApplications = new List<FoundIISApplication>()
+                    {
+                        new FoundIISApplication() {ApplicationName = "/", AppPoolName = "AppPool", IISLogicalPath = "/"}
+                    }
+                }
+            };
+            var dados = new List<IISWebSite>
+            {
+                new IISWebSite {IISWebSiteId = 1, Namewebsite = "IISWebSiteNome", Iislogpath = "/"}
+            };
+
+            var applications = new List<IISApplication>
+            {
+                new IISApplication
+                {
+                    Creationdate = DateTime.Now,
+                    Enddate = null,
+                    Logicalpath = "/"
+                }
+            };
+
+            _mockIISApplicationRepository.Setup(s => s.List()).Returns(applications.AsQueryable());
+            _uow.Setup(s => s.IISApplicationRepository).Returns(_mockIISApplicationRepository.Object);
+
+            var fakeDbSetApplications = new FakeDbSet<IISApplication>(applications);
+
+            _iisServerManagerService.Setup(s => s.ListWebSites()).Returns(foundIIWebsites);
+            _appManagerService.Object.Parse();
         }
     }
 }

@@ -5,6 +5,7 @@ namespace AppManager.Data.Access.Interfaces
 {
     public interface IRepository<T> where T : class
     {
+        DbSet<T> DbSet { get; }
         IQueryable<T> List();
         T Get(object id);
         int Count();
@@ -12,6 +13,5 @@ namespace AppManager.Data.Access.Interfaces
         void Remove(T entidade);
         void Remove(int id);
         void Update(T entidade);
-        DbSet<T> DbSet { get; }
     }
 }

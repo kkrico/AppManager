@@ -2,7 +2,7 @@
 
 namespace AppManager.Data.Access.Interfaces
 {
-    public interface ISoapEndpointRepository: IRepository<SoapEndpoint>
+    public interface ISoapEndpointRepository : IRepository<SoapEndpoint>
     {
     }
 }

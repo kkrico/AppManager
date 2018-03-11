@@ -71,10 +71,10 @@ namespace AppManager
         private static void RegisterAppManager(IUnityContainer container)
         {
             container.RegisterType<AppManagerController>(new InjectionConstructor
-                (
-                    new ResolvedParameter<IAppManagerService>(),
-                    new ResolvedParameter<IHubContext>(nameof(ParseStatusHub))
-                ));
+            (
+                new ResolvedParameter<IAppManagerService>(),
+                new ResolvedParameter<IHubContext>(nameof(ParseStatusHub))
+            ));
         }
 
         private static void RegisterServerManager(IUnityContainer container)

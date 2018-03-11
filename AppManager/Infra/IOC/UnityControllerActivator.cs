@@ -9,20 +9,20 @@ namespace AppManager.Infra.IOC
     public class UnityControllerActivator : IHttpControllerActivator
     {
         private readonly IUnityContainer _container;
- 
+
         public UnityControllerActivator(IUnityContainer container)
         {
             _container = container;
         }
- 
+
         public IHttpController Create(
             HttpRequestMessage request,
             HttpControllerDescriptor controllerDescriptor,
             Type controllerType)
         {
             var controller =
-                (IHttpController)_container.Resolve(controllerType);
- 
+                (IHttpController) _container.Resolve(controllerType);
+
             return controller;
         }
     }

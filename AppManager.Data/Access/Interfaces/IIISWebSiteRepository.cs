@@ -2,7 +2,7 @@
 
 namespace AppManager.Data.Access.Interfaces
 {
-    public interface IIISWebSiteRepository: IRepository<IISWebSite>
+    public interface IIISWebSiteRepository : IRepository<IISWebSite>
     {
     }
 }

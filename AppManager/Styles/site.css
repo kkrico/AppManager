@@ -1,21 +1,19 @@
-﻿#mainBody {
-    margin-top: 70px;
-}
+﻿#mainBody { margin-top: 70px; }
 
 .navbar-xs {
+    border-radius: 0;
     min-height: 22px;
-    border-radius: 0
 }
 
-    .navbar-xs .navbar-brand {
-        padding: 2px 8px;
-        font-size: 14px;
-        line-height: 14px;
-    }
+.navbar-xs .navbar-brand {
+    font-size: 14px;
+    line-height: 14px;
+    padding: 2px 8px;
+}
 
-    .navbar-xs .navbar-nav > li > a {
-        border-right: 1px solid #ddd;
-        padding-top: 2px;
-        padding-bottom: 2px;
-        line-height: 16px
-    }
+.navbar-xs .navbar-nav > li > a {
+    border-right: 1px solid #ddd;
+    line-height: 16px;
+    padding-bottom: 2px;
+    padding-top: 2px;
+}
