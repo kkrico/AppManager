@@ -208,9 +208,11 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\IOCConfig.cs" />
+    <Compile Include="App_Start\PerRequestLifetimeManager.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\SwaggerConfig.cs" />
     <Compile Include="App_Start\UnityContainer.cs" />
+    <Compile Include="Infra\IOC\UnityPerRequestHttpModule.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\api\AppManagerController.cs" />
     <Compile Include="Controllers\api\IISWebSiteController.cs" />
